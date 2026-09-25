@@ -71,6 +71,9 @@ a{color:var(--accent)}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--bad);display:inline-block;animation:pulse 1s infinite}
 @keyframes pulse{50%{opacity:.3}}
 .timer{font-variant-numeric:tabular-nums;font-size:20px;font-weight:600}
+.transcript-box{min-height:64px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+  margin:8px 0;background:var(--panel2);white-space:pre-wrap;line-height:1.7;font-family:var(--serif)}
+.transcript-box.empty{color:var(--muted);font-style:italic}
 .hl{background:rgba(168,106,31,.28);border-radius:3px;padding:0 2px}
 .diff-del{color:var(--muted);text-decoration:line-through}
 .diff-ins{color:var(--bad);text-decoration:underline}
@@ -2619,24 +2622,24 @@ function tabSpeaking(root,s){
     const c=Util.el("div",{class:"card"});
     c.appendChild(Util.el("h2",{text:"B. "+(iv.interviewType==="independent"?"Independent Speaking":"Take an Interview")+"　第 "+(idx+1)+" 題"}));
     c.appendChild(Util.el("div",{class:"eng",text:iv.prompt}));
-    c.appendChild(Util.el("div",{class:"muted small",text:`準備 ${iv.prepSeconds} 秒，作答 ${iv.speakSeconds} 秒`}));
+    c.appendChild(Util.el("div",{class:"muted small",text:`點擊「開始錄音」立即開始，最長 ${iv.speakSeconds} 秒（可提前停止）`}));
     const timer=Util.el("div",{class:"timer"});
-    const interim=Util.el("div",{class:"eng small muted"});
+    const interim=Util.el("div",{class:"transcript-box empty",text:"（開始錄音後，辨識到的內容會即時顯示在這裡）"});
     const ctl=Util.el("div",{class:"rec-row"});
     const startBtn=Util.el("button",{class:"primary",onclick:async()=>{
       startBtn.disabled=true;
-      // 準備倒數
-      await countdown(timer,iv.prepSeconds,"準備：");
-      timer.innerHTML='<span class="dot"></span> 作答中…';
+      // 不需準備時間：點擊立即開始錄音
+      interim.textContent="…";interim.classList.remove("empty");
+      timer.innerHTML='<span class="dot"></span> 錄音中…';
       const t0=Date.now();
       try{
-        const {blob,transcript}=await Speech.capture(iv.speakSeconds*1000,null,txt=>interim.textContent=txt);
+        const {blob,transcript}=await Speech.capture(iv.speakSeconds*1000,null,txt=>{interim.textContent=txt||"…";});
         iv.actualSeconds=Math.round((Date.now()-t0)/1000);
         iv.transcript=transcript;
         if(blob){iv.audioId="au_"+Util.uid();await DB.put("audio",{audioId:iv.audioId,blob});}
         await Session.save();renderPractice();
       }catch(e){timer.textContent="麥克風無法使用："+e.message;startBtn.disabled=false;}
-    }},["開始（準備→作答）"]);
+    }},["開始錄音"]);
     const stopBtn=Util.el("button",{onclick:()=>Speech.stop()},["提前停止"]);
     const typeBtn=Util.el("button",{onclick:()=>{const t=prompt("（fallback）輸入你的口說內容逐字稿：",iv.transcript||"");if(t==null)return;iv.transcript=t;Session.save();renderPractice();}},["改用打字作答"]);
     ctl.appendChild(startBtn);ctl.appendChild(stopBtn);ctl.appendChild(typeBtn);
