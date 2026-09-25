@@ -1,0 +1,2937 @@
+﻿<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TOEFL 練習 (iBT 2026)</title>
+<style>
+:root{
+  --bg:#f6f7f9; --panel:#ffffff; --panel2:#f0f2f5; --border:#dce0e6;
+  --text:#1d2430; --muted:#66707c; --accent:#2f6f8f; --accent2:#3a7d5d;
+  --ok:#2e7d46; --bad:#b23b3b; --warn:#a86a1f; --chip:#e7edf2;
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:system-ui,"Segoe UI","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#161a1f; --panel:#1f252c; --panel2:#262d35; --border:#333c46;
+    --text:#e6e9ee; --muted:#98a2ae; --accent:#5fa9c9; --accent2:#6fc194;
+    --ok:#6ac585; --bad:#e58585; --warn:#e0b467; --chip:#2b333c;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;line-height:1.6}
+button{font-family:inherit;font-size:14px;cursor:pointer;border:1px solid var(--border);
+  background:var(--panel);color:var(--text);padding:8px 14px;border-radius:8px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover{filter:brightness(1.08)}
+button.ghost{background:transparent}
+button:disabled{opacity:.5;cursor:not-allowed}
+input[type=text],textarea,select{font-family:inherit;font-size:15px;color:var(--text);
+  background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 10px;width:100%}
+textarea{line-height:1.7;resize:vertical}
+a{color:var(--accent)}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+.topbar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;padding:8px 12px;flex-wrap:wrap}
+.topbar .grow{flex:1}
+.saveinfo{font-size:12px;color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0}
+.card h2{margin:0 0 8px;font-size:18px}
+.card h3{margin:18px 0 6px;font-size:15px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button{border-radius:999px}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:2px 10px;font-size:12px;margin:2px}
+.tag-review{background:var(--accent2);color:#fff}
+.eng{font-family:var(--serif)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.reveal{margin-top:8px}
+.reveal-body{margin-top:8px;padding:12px;background:var(--panel2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+.ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+.blank-input{display:inline-block;width:auto;min-width:70px;padding:2px 6px;font-family:var(--serif)}
+.blank-ok{border-color:var(--ok);background:rgba(46,125,70,.12)}
+.blank-bad{border-color:var(--bad);background:rgba(178,59,59,.12)}
+.optbtn{display:block;width:100%;text-align:left;margin:4px 0}
+.optbtn.sel{border-color:var(--accent);background:var(--panel2)}
+.optbtn.correct{border-color:var(--ok);background:rgba(46,125,70,.15)}
+.optbtn.wrong{border-color:var(--bad);background:rgba(178,59,59,.15)}
+.passage{font-family:var(--serif);line-height:2;white-space:pre-wrap;background:var(--panel2);padding:14px;border-radius:8px}
+.chunk{display:inline-block;background:var(--chip);border:1px solid var(--border);border-radius:8px;
+  padding:6px 10px;margin:4px;cursor:pointer;font-family:var(--serif)}
+.chunk.used{opacity:.35;pointer-events:none}
+.answer-slot{min-height:44px;border:1px dashed var(--border);border-radius:8px;padding:8px;margin:6px 0;font-family:var(--serif)}
+.answer-slot .chunk{cursor:pointer}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;
+  justify-content:center;z-index:50;padding:16px}
+.modal{background:var(--panel);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.rec-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--bad);display:inline-block;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.timer{font-variant-numeric:tabular-nums;font-size:20px;font-weight:600}
+.hl{background:rgba(168,106,31,.28);border-radius:3px;padding:0 2px}
+.diff-del{color:var(--muted);text-decoration:line-through}
+.diff-ins{color:var(--bad);text-decoration:underline}
+.list-row{display:flex;gap:10px;align-items:center;padding:10px;border:1px solid var(--border);
+  border-radius:8px;margin:6px 0;flex-wrap:wrap}
+.list-row .grow{flex:1;min-width:200px}
+.bar{height:10px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+.band{font-size:22px;font-weight:700;color:var(--accent)}
+.loading{display:inline-flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+.spin{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:left;font-size:14px}
+.notice{background:rgba(168,106,31,.15);border:1px solid var(--warn);border-radius:8px;padding:10px;margin:10px 0}
+.scoreline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0}
+label.blk{display:block;margin:6px 0}
+</style>
+
+<div id="app"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   TOEFL Practice — 單一 HTML，IndexedDB 儲存，2026 iBT 新制
+   模組：DB / Bank / Session / Persist / Scoring / Review /
+        Speech / AI / Backup / Charts / Util / Render
+   ============================================================ */
+
+/* ---------- 內建種子題庫（可一鍵匯入） ---------- */
+const SEED_BANK = {
+  "version": "1.0",
+  "createdAt": "2026-09-25",
+  "format": "TOEFL iBT 2026",
+  "note": "種子題庫。所有題目皆為原創，依 2026 新制考點設計，不含任何 ETS 官方題目原文。",
+  "enums": {
+    "topic": [
+      "medicine",
+      "environment",
+      "psychology",
+      "economics",
+      "technology",
+      "history",
+      "education",
+      "arts"
+    ],
+    "level": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "errorType": [
+      "tense",
+      "article",
+      "preposition",
+      "agreement",
+      "collocation",
+      "structure",
+      "meaning",
+      "word-form",
+      "connector"
+    ],
+    "structure": [
+      "simple",
+      "compound",
+      "relative-clause",
+      "participle",
+      "inversion",
+      "subjunctive",
+      "comparative",
+      "cleft"
+    ]
+  },
+  "vocab": [
+    {
+      "word": "prevalence",
+      "pos": "n.",
+      "zh": "盛行率",
+      "example": "The prevalence of type 2 diabetes has risen sharply among adolescents over the past decade.",
+      "note": "常用 the prevalence of X among Y。與 incidence（新發生率）不同，prevalence 指某時點的總病例比例。",
+      "topic": "medicine",
+      "level": "intermediate"
+    },
+    {
+      "word": "susceptible",
+      "pos": "adj.",
+      "zh": "易受影響的",
+      "example": "Older adults are more susceptible to respiratory infections during the winter months.",
+      "note": "固定用 be susceptible to + 名詞，to 後面不接原形動詞。",
+      "topic": "medicine",
+      "level": "intermediate"
+    },
+    {
+      "word": "alleviate",
+      "pos": "v.",
+      "zh": "緩解",
+      "example": "The new protocol aims to alleviate chronic pain without increasing opioid dosage.",
+      "note": "受詞是抽象的痛苦或問題（pain, symptoms, poverty），不接具體物品。",
+      "topic": "medicine",
+      "level": "advanced"
+    },
+    {
+      "word": "diagnosis",
+      "pos": "n.",
+      "zh": "診斷",
+      "example": "An early diagnosis significantly improves the patient's chances of recovery.",
+      "note": "複數是 diagnoses。動詞形是 diagnose somebody with something。",
+      "topic": "medicine",
+      "level": "beginner"
+    },
+    {
+      "word": "deplete",
+      "pos": "v.",
+      "zh": "耗盡",
+      "example": "Intensive farming can deplete the soil of essential nutrients within a few seasons.",
+      "note": "句型 deplete A of B。被動的 be depleted 比主動更常見。",
+      "topic": "environment",
+      "level": "advanced"
+    },
+    {
+      "word": "emission",
+      "pos": "n.",
+      "zh": "排放",
+      "example": "The city pledged to cut carbon emissions by forty percent before 2030.",
+      "note": "談氣體污染時幾乎一定用複數 emissions。",
+      "topic": "environment",
+      "level": "intermediate"
+    },
+    {
+      "word": "sustainable",
+      "pos": "adj.",
+      "zh": "永續的",
+      "example": "Sustainable forestry allows timber to be harvested without destroying the ecosystem.",
+      "note": "反義字 unsustainable，名詞 sustainability。",
+      "topic": "environment",
+      "level": "beginner"
+    },
+    {
+      "word": "habitat",
+      "pos": "n.",
+      "zh": "棲地",
+      "example": "Rising sea levels are destroying the coastal habitat of several migratory birds.",
+      "note": "natural habitat 與 habitat loss 是高頻搭配。",
+      "topic": "environment",
+      "level": "beginner"
+    },
+    {
+      "word": "cognitive",
+      "pos": "adj.",
+      "zh": "認知的",
+      "example": "Sleep deprivation impairs cognitive functions such as memory and attention.",
+      "note": "cognitive ability / cognitive decline / cognitive load 都是常見搭配。",
+      "topic": "psychology",
+      "level": "intermediate"
+    },
+    {
+      "word": "bias",
+      "pos": "n.",
+      "zh": "偏誤",
+      "example": "Researchers used a double-blind design to eliminate observer bias.",
+      "note": "可數與不可數都有。動詞用法是 bias somebody against 或 toward something。",
+      "topic": "psychology",
+      "level": "intermediate"
+    },
+    {
+      "word": "reinforce",
+      "pos": "v.",
+      "zh": "強化",
+      "example": "Praising effort rather than talent reinforces a child's willingness to take on hard tasks.",
+      "note": "受詞多半是行為或信念，也可用於強化實體結構。",
+      "topic": "psychology",
+      "level": "intermediate"
+    },
+    {
+      "word": "plausible",
+      "pos": "adj.",
+      "zh": "貌似合理的",
+      "example": "Although her explanation sounded plausible, the data did not support it.",
+      "note": "帶有「聽起來合理但未必正確」的語氣，常與 although 或 but 連用。",
+      "topic": "psychology",
+      "level": "advanced"
+    },
+    {
+      "word": "incentive",
+      "pos": "n.",
+      "zh": "誘因",
+      "example": "Tax rebates provide a strong incentive for companies to invest in clean energy.",
+      "note": "句型 an incentive for somebody to do something。financial incentive 為高頻搭配。",
+      "topic": "economics",
+      "level": "intermediate"
+    },
+    {
+      "word": "fluctuate",
+      "pos": "v.",
+      "zh": "波動",
+      "example": "Oil prices fluctuated wildly throughout the second quarter.",
+      "note": "主詞通常是價格、需求、溫度等可量測的東西。名詞是 fluctuation。",
+      "topic": "economics",
+      "level": "intermediate"
+    },
+    {
+      "word": "subsidy",
+      "pos": "n.",
+      "zh": "補貼",
+      "example": "Without government subsidies, the solar industry would have collapsed in its early years.",
+      "note": "複數 subsidies。動詞是 subsidize。",
+      "topic": "economics",
+      "level": "advanced"
+    },
+    {
+      "word": "allocate",
+      "pos": "v.",
+      "zh": "分配",
+      "example": "The committee allocated most of the budget to primary education.",
+      "note": "句型 allocate A to B。名詞是 allocation。",
+      "topic": "economics",
+      "level": "intermediate"
+    },
+    {
+      "word": "algorithm",
+      "pos": "n.",
+      "zh": "演算法",
+      "example": "The recommendation algorithm learns from what users click rather than what they say they like.",
+      "note": "形容詞 algorithmic。常用 an algorithm for doing something。",
+      "topic": "technology",
+      "level": "beginner"
+    },
+    {
+      "word": "automate",
+      "pos": "v.",
+      "zh": "自動化",
+      "example": "Hospitals have begun to automate routine scheduling to free up nursing staff.",
+      "note": "名詞 automation。被動的 be automated 很常見。",
+      "topic": "technology",
+      "level": "intermediate"
+    },
+    {
+      "word": "obsolete",
+      "pos": "adj.",
+      "zh": "過時的",
+      "example": "Fax machines became obsolete once encrypted email was widely adopted.",
+      "note": "固定搭配 become obsolete 或 render something obsolete。不說 very obsolete。",
+      "topic": "technology",
+      "level": "advanced"
+    },
+    {
+      "word": "scalable",
+      "pos": "adj.",
+      "zh": "可擴展的",
+      "example": "The prototype worked well in one clinic, but it was never scalable to an entire hospital network.",
+      "note": "名詞 scalability。科技與商業寫作的高頻字。",
+      "topic": "technology",
+      "level": "advanced"
+    },
+    {
+      "word": "artifact",
+      "pos": "n.",
+      "zh": "文物、人工製品",
+      "example": "The artifacts recovered from the site suggest a trading network spanning three continents.",
+      "note": "英式拼法是 artefact。考古語境多用複數。",
+      "topic": "history",
+      "level": "intermediate"
+    },
+    {
+      "word": "decline",
+      "pos": "n./v.",
+      "zh": "衰退",
+      "example": "Historians still debate what caused the decline of the empire.",
+      "note": "名詞用 the decline of X。動詞另有「婉拒」的意思，需看語境判斷。",
+      "topic": "history",
+      "level": "beginner"
+    },
+    {
+      "word": "attribute",
+      "pos": "v.",
+      "zh": "歸因於",
+      "example": "Most scholars attribute the collapse to prolonged drought rather than invasion.",
+      "note": "句型 attribute A to B。當名詞時重音在第一音節，意思是「特質」。",
+      "topic": "history",
+      "level": "advanced"
+    },
+    {
+      "word": "prevail",
+      "pos": "v.",
+      "zh": "盛行、佔上風",
+      "example": "The belief that the earth was flat prevailed for centuries in some regions.",
+      "note": "prevail over somebody 是「戰勝」。形容詞 prevailing 意為「普遍的」。",
+      "topic": "history",
+      "level": "advanced"
+    },
+    {
+      "word": "curriculum",
+      "pos": "n.",
+      "zh": "課程",
+      "example": "The university revised its curriculum to include data literacy for all majors.",
+      "note": "複數 curricula 或 curriculums 皆可接受。",
+      "topic": "education",
+      "level": "beginner"
+    },
+    {
+      "word": "enroll",
+      "pos": "v.",
+      "zh": "註冊",
+      "example": "Over two thousand students enrolled in the online statistics course last term.",
+      "note": "美式 enroll in a course，英式 enrol on a course。",
+      "topic": "education",
+      "level": "beginner"
+    },
+    {
+      "word": "rigorous",
+      "pos": "adj.",
+      "zh": "嚴格的、嚴謹的",
+      "example": "The program is known for its rigorous training in research methods.",
+      "note": "形容標準、訓練、測試或方法，不用來形容人的個性。",
+      "topic": "education",
+      "level": "intermediate"
+    },
+    {
+      "word": "facilitate",
+      "pos": "v.",
+      "zh": "促進",
+      "example": "Small group discussions facilitate deeper understanding than lectures alone.",
+      "note": "受詞是抽象過程（learning, communication），不直接接人。",
+      "topic": "education",
+      "level": "intermediate"
+    },
+    {
+      "word": "aesthetic",
+      "pos": "adj./n.",
+      "zh": "美學的、美感風格",
+      "example": "The building's stark aesthetic divided critics when it opened.",
+      "note": "當名詞指整體風格。aesthetically pleasing 是高頻搭配。",
+      "topic": "arts",
+      "level": "advanced"
+    },
+    {
+      "word": "depict",
+      "pos": "v.",
+      "zh": "描繪",
+      "example": "The mural depicts workers building the city's first railway.",
+      "note": "用於視覺作品。用文字描述時要用 describe。",
+      "topic": "arts",
+      "level": "intermediate"
+    }
+  ],
+  "completeWords": [
+    {
+      "id": "cw_001",
+      "topic": "history",
+      "level": "intermediate",
+      "instruction": "把每個空格的單字補完整。",
+      "passage": "We {{1}} assume that prehistoric communities were concerned {{2}} with survival. Archaeological evidence, {{3}}, suggests otherwise. Ornaments carved from shell have been {{4}} at sites more than forty thousand years old.",
+      "items": [
+        {
+          "id": 1,
+          "hint": "mi___",
+          "answer": "might",
+          "explanation": "推測語氣的助動詞，後面接原形動詞 assume。",
+          "purpose": "情態助動詞的拼字與語氣判斷"
+        },
+        {
+          "id": 2,
+          "hint": "on___",
+          "answer": "only",
+          "explanation": "were concerned only with survival，only 修飾範圍。",
+          "purpose": "副詞位置與拼字"
+        },
+        {
+          "id": 3,
+          "hint": "howe___",
+          "answer": "however",
+          "explanation": "逗號隔開的插入語，表示與前句相反。",
+          "purpose": "學術文章高頻轉折詞"
+        },
+        {
+          "id": 4,
+          "hint": "fo___",
+          "answer": "found",
+          "explanation": "have been found 為現在完成被動式。",
+          "purpose": "不規則動詞過去分詞"
+        }
+      ]
+    },
+    {
+      "id": "cw_002",
+      "topic": "environment",
+      "level": "intermediate",
+      "instruction": "把每個空格的單字補完整。",
+      "passage": "Glaciers do not melt {{1}} across their surface. The lower {{2}}, where the ice is {{3}} and closer to bedrock, tends to disappear {{4}}, while the upper mass remains {{5}} for decades.",
+      "items": [
+        {
+          "id": 1,
+          "hint": "eve___",
+          "answer": "evenly",
+          "explanation": "修飾動詞 melt，要用副詞 -ly 形式。",
+          "purpose": "副詞字尾變化"
+        },
+        {
+          "id": 2,
+          "hint": "sec___",
+          "answer": "sections",
+          "explanation": "後面動詞是 tends，但主詞核心是 the lower sections 的整體概念；此處考名詞複數拼字。",
+          "purpose": "名詞單複數"
+        },
+        {
+          "id": 3,
+          "hint": "thi___",
+          "answer": "thinner",
+          "explanation": "與上層對比，用比較級。",
+          "purpose": "比較級字尾"
+        },
+        {
+          "id": 4,
+          "hint": "fir___",
+          "answer": "first",
+          "explanation": "disappear first，表示順序的副詞。",
+          "purpose": "順序副詞"
+        },
+        {
+          "id": 5,
+          "hint": "sta___",
+          "answer": "stable",
+          "explanation": "remains 後接形容詞作主詞補語。",
+          "purpose": "連綴動詞後的形容詞"
+        }
+      ]
+    },
+    {
+      "id": "cw_003",
+      "topic": "psychology",
+      "level": "advanced",
+      "instruction": "把每個空格的單字補完整。",
+      "passage": "Memory is not a {{1}} of the past but a {{2}} of it. Each time we recall an {{3}}, we alter it {{4}}, which is why confident witnesses are not {{5}} accurate ones.",
+      "items": [
+        {
+          "id": 1,
+          "hint": "rec___",
+          "answer": "record",
+          "explanation": "not a record but a reconstruction，兩個對比的名詞。",
+          "purpose": "not A but B 的平行結構"
+        },
+        {
+          "id": 2,
+          "hint": "recons___",
+          "answer": "reconstruction",
+          "explanation": "動詞 reconstruct 的名詞形，字尾 -ion。",
+          "purpose": "字首字尾組合"
+        },
+        {
+          "id": 3,
+          "hint": "ev___",
+          "answer": "event",
+          "explanation": "冠詞 an 提示下一個字以母音開頭。",
+          "purpose": "冠詞與字首發音的對應"
+        },
+        {
+          "id": 4,
+          "hint": "slig___",
+          "answer": "slightly",
+          "explanation": "修飾動詞 alter，需要副詞。",
+          "purpose": "副詞字尾變化"
+        },
+        {
+          "id": 5,
+          "hint": "necess___",
+          "answer": "necessarily",
+          "explanation": "not necessarily 是固定搭配，意為「未必」。",
+          "purpose": "高頻副詞片語拼字"
+        }
+      ]
+    },
+    {
+      "id": "cw_004",
+      "topic": "technology",
+      "level": "intermediate",
+      "instruction": "把每個空格的單字補完整。",
+      "passage": "Machine learning models are only as {{1}} as the data they are {{2}} on. If a dataset under-represents a particular {{3}}, the model will {{4}} poorly for that group no matter how {{5}} the algorithm is.",
+      "items": [
+        {
+          "id": 1,
+          "hint": "relia___",
+          "answer": "reliable",
+          "explanation": "as ... as 之間要放形容詞。",
+          "purpose": "同等比較句型"
+        },
+        {
+          "id": 2,
+          "hint": "trai___",
+          "answer": "trained",
+          "explanation": "be trained on data 是機器學習的固定說法。",
+          "purpose": "領域固定搭配"
+        },
+        {
+          "id": 3,
+          "hint": "gr___",
+          "answer": "group",
+          "explanation": "與下一句的 that group 呼應。",
+          "purpose": "上下文指涉一致"
+        },
+        {
+          "id": 4,
+          "hint": "perf___",
+          "answer": "perform",
+          "explanation": "will 後面接原形動詞。",
+          "purpose": "助動詞後的動詞形式"
+        },
+        {
+          "id": 5,
+          "hint": "sophis___",
+          "answer": "sophisticated",
+          "explanation": "no matter how + 形容詞 + 主詞 + be 動詞。",
+          "purpose": "讓步子句的語序"
+        }
+      ]
+    }
+  ],
+  "dailyLifeReading": [
+    {
+      "id": "dlr_001",
+      "topic": "education",
+      "level": "beginner",
+      "textType": "notice",
+      "passage": "NOTICE — Instrument Room, Building C\n\nStarting October 6, the instrument room will be open from 8:00 a.m. to 6:00 p.m. on weekdays only. Weekend access has been suspended while the ventilation system is replaced. Students with approved late-night projects may apply for a temporary key card at the department office; applications close on October 3. Equipment already booked for a weekend slot will be moved to the nearest weekday slot automatically, and you will be notified by email.",
+      "items": [
+        {
+          "id": 1,
+          "question": "What is the main purpose of this notice?",
+          "options": [
+            "To announce a change in access hours",
+            "To introduce new laboratory equipment",
+            "To advertise a safety training session",
+            "To report an accident in the building"
+          ],
+          "answer": 0,
+          "explanation": "整篇的核心是開放時間改變與週末暫停，其他選項都沒有提到。",
+          "purpose": "主旨判斷"
+        },
+        {
+          "id": 2,
+          "question": "What will happen to equipment already booked for a Saturday?",
+          "options": [
+            "The booking will be cancelled without notice",
+            "It will be automatically moved to a weekday slot",
+            "It must be rebooked in person at the office",
+            "It will be moved to the following weekend"
+          ],
+          "answer": 1,
+          "explanation": "最後一句明確說明會自動移到最近的平日時段並以 email 通知。",
+          "purpose": "細節定位"
+        }
+      ]
+    },
+    {
+      "id": "dlr_002",
+      "topic": "education",
+      "level": "intermediate",
+      "textType": "email",
+      "passage": "Subject: Change to the Chen Scholarship deadline\n\nDear applicants,\n\nBecause of a problem with the online submission system last week, the deadline for the Chen Scholarship has been extended from November 1 to November 15. If you already submitted your application, you do not need to do anything; your file has been received. If you started an application but could not upload your transcript, please log in again and confirm that all three documents appear under \"Submitted.\" Recommendation letters are due on the same date, so remind your referees this week.",
+      "items": [
+        {
+          "id": 1,
+          "question": "Why was the deadline extended?",
+          "options": [
+            "Too few students applied",
+            "A technical problem affected submissions",
+            "The committee needed more review time",
+            "An additional document was required"
+          ],
+          "answer": 1,
+          "explanation": "第一句說明原因是線上系統出問題。",
+          "purpose": "因果關係"
+        },
+        {
+          "id": 2,
+          "question": "What should a student who has already submitted do?",
+          "options": [
+            "Resubmit the entire application",
+            "Contact the committee to confirm",
+            "Nothing",
+            "Upload the transcript one more time"
+          ],
+          "answer": 2,
+          "explanation": "信中直接說 you do not need to do anything。",
+          "purpose": "條件對應（找出符合自己情況的那一句）"
+        }
+      ]
+    },
+    {
+      "id": "dlr_003",
+      "topic": "education",
+      "level": "intermediate",
+      "textType": "terms",
+      "passage": "Campus Fitness Centre — Membership Terms\n\nA semester membership costs NT$1,200 and runs from the first day of classes to the last day of the exam period. Members may bring one guest per month at no charge; additional guests are NT$100 each. Memberships cannot be transferred to another person, but they may be frozen for up to four weeks with a medical certificate. Lockers are assigned on a first-come basis and must be emptied by the final day of the semester.",
+      "items": [
+        {
+          "id": 1,
+          "question": "How much does a member pay to bring a second guest in the same month?",
+          "options": [
+            "Nothing",
+            "NT$100",
+            "NT$200",
+            "NT$1,200"
+          ],
+          "answer": 1,
+          "explanation": "每月第一位訪客免費，之後每位 NT$100。要讀出 additional 的意思。",
+          "purpose": "金額推算與例外條件"
+        },
+        {
+          "id": 2,
+          "question": "Under what condition can a membership be paused?",
+          "options": [
+            "If the member transfers it to a friend",
+            "If the member provides a medical certificate",
+            "If the member empties the locker first",
+            "If the member pays an extra fee"
+          ],
+          "answer": 1,
+          "explanation": "條款寫明凍結最多四週且需要醫療證明。",
+          "purpose": "條件限制的細節"
+        }
+      ]
+    }
+  ],
+  "cloze": [
+    {
+      "id": "cloze_001",
+      "topic": "medicine",
+      "level": "intermediate",
+      "passage": "Sleep is often treated as a luxury, but researchers now regard it as {{1}} to physical health. During deep sleep, the body releases proteins {{2}} cytokines, {{3}} help regulate inflammation and fight infection. When people sleep fewer than six hours a night, cytokine production drops, {{4}} leaves the immune system less able to respond to pathogens. A study conducted {{5}} 2019 found that participants who slept poorly were nearly three times more likely to develop a cold after exposure to a virus. {{6}} these findings, several hospitals have begun redesigning night shifts. Critics point out, {{7}}, that sleep quality is difficult to measure outside a laboratory. {{8}} the debate continues, most physicians agree that consistent sleep is one of the cheapest interventions available.",
+      "items": [
+        {
+          "id": 1,
+          "options": [
+            "essential",
+            "essentially",
+            "essence",
+            "essentiality"
+          ],
+          "answer": 0,
+          "errorType": "word-form",
+          "explanation": "regard A as B 的 B 位置放形容詞或名詞，這裡搭配 to physical health 必須用形容詞 essential。",
+          "purpose": "regard as 句型後的詞性判斷"
+        },
+        {
+          "id": 2,
+          "options": [
+            "called",
+            "calling",
+            "call",
+            "to call"
+          ],
+          "answer": 0,
+          "errorType": "word-form",
+          "explanation": "過去分詞當後位修飾，等於 which are called。",
+          "purpose": "分詞當形容詞修飾名詞"
+        },
+        {
+          "id": 3,
+          "options": [
+            "which",
+            "what",
+            "it",
+            "where"
+          ],
+          "answer": 0,
+          "errorType": "structure",
+          "explanation": "先行詞是 cytokines，關係代名詞作主詞用 which。",
+          "purpose": "關係代名詞選擇"
+        },
+        {
+          "id": 4,
+          "options": [
+            "that",
+            "what",
+            "which",
+            "and it"
+          ],
+          "answer": 2,
+          "errorType": "structure",
+          "explanation": "逗號後的 which 指涉前面整個子句，that 不能這樣用。",
+          "purpose": "which 指涉整句的非限定用法"
+        },
+        {
+          "id": 5,
+          "options": [
+            "in",
+            "on",
+            "at",
+            "since"
+          ],
+          "answer": 0,
+          "errorType": "preposition",
+          "explanation": "單獨的年份用 in。",
+          "purpose": "時間介系詞"
+        },
+        {
+          "id": 6,
+          "options": [
+            "Despite",
+            "In light of",
+            "Instead of",
+            "Regardless of"
+          ],
+          "answer": 1,
+          "errorType": "connector",
+          "explanation": "前後是順向因果：因為這些發現所以改變排班。In light of 表示「依據、鑑於」。",
+          "purpose": "因果型片語連接詞"
+        },
+        {
+          "id": 7,
+          "options": [
+            "therefore",
+            "moreover",
+            "however",
+            "thus"
+          ],
+          "answer": 2,
+          "errorType": "connector",
+          "explanation": "Critics point out 引出反面意見，需要轉折詞。",
+          "purpose": "插入語位置的轉折詞"
+        },
+        {
+          "id": 8,
+          "options": [
+            "Because",
+            "While",
+            "Unless",
+            "Since"
+          ],
+          "answer": 1,
+          "errorType": "connector",
+          "explanation": "前後是讓步關係：雖然還在爭論，但多數醫師同意。",
+          "purpose": "讓步連接詞 while 的用法"
+        }
+      ]
+    },
+    {
+      "id": "cloze_002",
+      "topic": "environment",
+      "level": "advanced",
+      "passage": "Coral reefs occupy less than one percent of the ocean floor, {{1}} they support roughly a quarter of all marine species. This disproportion {{2}} from the relationship between coral polyps and the algae living inside them. The algae supply the coral with energy through photosynthesis; in return, the coral offers shelter and the compounds the algae need to {{3}}. When water temperatures rise even slightly, however, the coral expels the algae, a process {{4}} as bleaching. Bleached coral is not dead, but it is severely weakened and highly {{5}} to disease. Recovery is possible {{6}} temperatures fall back within a few weeks. {{7}}, repeated bleaching events leave reefs little time to recover, and the long-term survival of many reef systems {{8}} increasingly uncertain.",
+      "items": [
+        {
+          "id": 1,
+          "options": [
+            "yet",
+            "so",
+            "because",
+            "therefore"
+          ],
+          "answer": 0,
+          "errorType": "connector",
+          "explanation": "面積極小卻養活四分之一物種，是對比關係。yet 在此等於 but。",
+          "purpose": "對比連接詞 yet"
+        },
+        {
+          "id": 2,
+          "options": [
+            "results",
+            "causes",
+            "leads",
+            "brings"
+          ],
+          "answer": 0,
+          "errorType": "collocation",
+          "explanation": "result from 是「起因於」，result in 才是「導致」。方向不能弄反。",
+          "purpose": "result from 與 result in 的方向差異"
+        },
+        {
+          "id": 3,
+          "options": [
+            "survive",
+            "surviving",
+            "survival",
+            "survived"
+          ],
+          "answer": 0,
+          "errorType": "word-form",
+          "explanation": "need to 後接原形動詞。",
+          "purpose": "不定詞後的動詞形式"
+        },
+        {
+          "id": 4,
+          "options": [
+            "known",
+            "knowing",
+            "know",
+            "to know"
+          ],
+          "answer": 0,
+          "errorType": "collocation",
+          "explanation": "a process known as X 是固定說法，known 為過去分詞。",
+          "purpose": "known as 的固定搭配"
+        },
+        {
+          "id": 5,
+          "options": [
+            "vulnerable",
+            "vulnerability",
+            "vulnerably",
+            "invulnerable"
+          ],
+          "answer": 0,
+          "errorType": "word-form",
+          "explanation": "and 連接兩個形容詞 weakened 與 vulnerable，且 vulnerable to 為固定搭配。",
+          "purpose": "對等連接的詞性平行"
+        },
+        {
+          "id": 6,
+          "options": [
+            "provided that",
+            "in case",
+            "so that",
+            "even if"
+          ],
+          "answer": 0,
+          "errorType": "connector",
+          "explanation": "provided that 表示「只要……就」，是條件而非假設或目的。",
+          "purpose": "條件連接詞的細微差異"
+        },
+        {
+          "id": 7,
+          "options": [
+            "In addition",
+            "Unfortunately",
+            "By contrast",
+            "For instance"
+          ],
+          "answer": 1,
+          "errorType": "connector",
+          "explanation": "前句說有機會復原，後句說現實上來不及，語氣轉為負面評論。",
+          "purpose": "評論性副詞的語氣判斷"
+        },
+        {
+          "id": 8,
+          "options": [
+            "look",
+            "looks",
+            "are looking",
+            "have looked"
+          ],
+          "answer": 1,
+          "errorType": "agreement",
+          "explanation": "主詞核心是 survival（單數），不是 systems。",
+          "purpose": "長主詞的主謂一致"
+        }
+      ]
+    },
+    {
+      "id": "cloze_003",
+      "topic": "psychology",
+      "level": "intermediate",
+      "passage": "Students often prepare for exams by studying for many hours {{1}} a single night. Psychologists call this cramming, and research suggests it is one of the least efficient ways {{2}}. Information reviewed once tends to fade quickly, {{3}} information reviewed several times across several days tends to stay. This pattern is known as the spacing effect, and it {{4}} demonstrated in hundreds of experiments since the 1880s. The practical advice is simple: {{5}} of studying for four hours on Sunday, study for one hour on four different days. Students who follow this schedule usually report {{6}} noticeable drop in exam anxiety. {{7}} the method requires planning ahead, many students abandon it during busy weeks. Teachers can support the habit {{8}} building short review activities into regular class time.",
+      "items": [
+        {
+          "id": 1,
+          "options": [
+            "in",
+            "on",
+            "at",
+            "for"
+          ],
+          "answer": 0,
+          "errorType": "preposition",
+          "explanation": "in a single night 指「在一個晚上之內」。on 用於特定日期。",
+          "purpose": "時間長度與時間點的介系詞差異"
+        },
+        {
+          "id": 2,
+          "options": [
+            "to learn",
+            "learning",
+            "of learning",
+            "learn"
+          ],
+          "answer": 0,
+          "errorType": "structure",
+          "explanation": "one of the + 最高級 + 名詞 + to do something 的固定結構。",
+          "purpose": "ways to do something 的不定詞修飾"
+        },
+        {
+          "id": 3,
+          "options": [
+            "while",
+            "because",
+            "so",
+            "unless"
+          ],
+          "answer": 0,
+          "errorType": "connector",
+          "explanation": "前後兩句是對照，while 在此表示「反之」。",
+          "purpose": "while 表對照的用法"
+        },
+        {
+          "id": 4,
+          "options": [
+            "was",
+            "has been",
+            "is being",
+            "had been"
+          ],
+          "answer": 1,
+          "errorType": "tense",
+          "explanation": "since the 1880s 必須搭配現在完成式。",
+          "purpose": "since 引導的完成式"
+        },
+        {
+          "id": 5,
+          "options": [
+            "Instead",
+            "Apart",
+            "Aside",
+            "Except"
+          ],
+          "answer": 0,
+          "errorType": "connector",
+          "explanation": "instead of + 動名詞，表示「不做 A 而做 B」。",
+          "purpose": "instead of 的介系詞片語"
+        },
+        {
+          "id": 6,
+          "options": [
+            "a",
+            "an",
+            "the",
+            "some"
+          ],
+          "answer": 0,
+          "errorType": "article",
+          "explanation": "drop 是可數單數且首次提及，noticeable 以子音開頭所以用 a。",
+          "purpose": "不定冠詞的選擇"
+        },
+        {
+          "id": 7,
+          "options": [
+            "Although",
+            "Despite",
+            "However",
+            "Therefore"
+          ],
+          "answer": 0,
+          "errorType": "connector",
+          "explanation": "後面接的是完整子句，只能用連接詞 Although。Despite 後面要接名詞。",
+          "purpose": "連接詞與介系詞的區別"
+        },
+        {
+          "id": 8,
+          "options": [
+            "by",
+            "for",
+            "to",
+            "at"
+          ],
+          "answer": 0,
+          "errorType": "preposition",
+          "explanation": "by + 動名詞表示「藉由某種方式」。",
+          "purpose": "表方法的介系詞"
+        }
+      ]
+    }
+  ],
+  "buildSentence": [
+    {
+      "id": "bs_001",
+      "level": "beginner",
+      "structure": "simple",
+      "chunks": [
+        "to postpone",
+        "the committee",
+        "until next month",
+        "has decided",
+        "the deadline"
+      ],
+      "answer": "The committee has decided to postpone the deadline until next month.",
+      "explanation": "主詞 + 完成式 + 不定詞受詞 + 時間片語的基本語序。",
+      "purpose": "基本語序與時間片語位置"
+    },
+    {
+      "id": "bs_002",
+      "level": "advanced",
+      "structure": "inversion",
+      "chunks": [
+        "concrete evidence",
+        "does the author",
+        "rarely",
+        "for these claims",
+        "provide"
+      ],
+      "answer": "Rarely does the author provide concrete evidence for these claims.",
+      "explanation": "否定副詞 Rarely 置句首時後面要倒裝，助動詞 does 提前，主要動詞回原形。",
+      "purpose": "否定副詞開頭的倒裝"
+    },
+    {
+      "id": "bs_003",
+      "level": "intermediate",
+      "structure": "relative-clause",
+      "chunks": [
+        "will receive",
+        "attend the workshop",
+        "students who",
+        "of completion",
+        "a certificate"
+      ],
+      "answer": "Students who attend the workshop will receive a certificate of completion.",
+      "explanation": "關係子句插在主詞後，主要動詞 will receive 要等關係子句結束才出現。",
+      "purpose": "主詞後置關係子句的斷句"
+    },
+    {
+      "id": "bs_004",
+      "level": "intermediate",
+      "structure": "participle",
+      "chunks": [
+        "as planned",
+        "the heavy rain",
+        "despite",
+        "went ahead",
+        "the outdoor ceremony"
+      ],
+      "answer": "Despite the heavy rain, the outdoor ceremony went ahead as planned.",
+      "explanation": "Despite 是介系詞，後面接名詞片語而非子句。",
+      "purpose": "介系詞型讓步結構"
+    },
+    {
+      "id": "bs_005",
+      "level": "advanced",
+      "structure": "inversion",
+      "chunks": [
+        "the scale of the problem",
+        "not until",
+        "did the public",
+        "the results were published",
+        "understand"
+      ],
+      "answer": "Not until the results were published did the public understand the scale of the problem.",
+      "explanation": "Not until 引導的子句放句首時，主要子句要倒裝，而不是 until 子句本身倒裝。",
+      "purpose": "Not until 的倒裝位置"
+    },
+    {
+      "id": "bs_006",
+      "level": "advanced",
+      "structure": "comparative",
+      "chunks": [
+        "the exam period will be",
+        "you start revising",
+        "the sooner",
+        "stressful",
+        "the less"
+      ],
+      "answer": "The sooner you start revising, the less stressful the exam period will be.",
+      "explanation": "the + 比較級, the + 比較級 的雙重比較句型，兩個子句各自完整。",
+      "purpose": "the 比較級 the 比較級"
+    },
+    {
+      "id": "bs_007",
+      "level": "advanced",
+      "structure": "participle",
+      "chunks": [
+        "three finalists",
+        "the panel",
+        "all the applications",
+        "selected",
+        "having reviewed"
+      ],
+      "answer": "Having reviewed all the applications, the panel selected three finalists.",
+      "explanation": "完成式分詞構句表示動作先後，分詞的主詞必須與主要子句一致。",
+      "purpose": "完成式分詞構句"
+    },
+    {
+      "id": "bs_008",
+      "level": "advanced",
+      "structure": "cleft",
+      "chunks": [
+        "to abandon the project",
+        "it was",
+        "forced the team",
+        "the delay in funding",
+        "that"
+      ],
+      "answer": "It was the delay in funding that forced the team to abandon the project.",
+      "explanation": "It was ... that ... 的強調句，把被強調的成分放在 was 之後。",
+      "purpose": "分裂句強調結構"
+    }
+  ],
+  "translation": [
+    {
+      "id": "trans_001",
+      "topic": "medicine",
+      "level": "beginner",
+      "structure": "simple",
+      "zh": "這項研究顯示睡眠不足會影響記憶力。",
+      "reference": [
+        "This study shows that a lack of sleep affects memory.",
+        "The study indicates that insufficient sleep impairs memory."
+      ],
+      "purpose": "that 名詞子句當受詞"
+    },
+    {
+      "id": "trans_002",
+      "topic": "economics",
+      "level": "beginner",
+      "structure": "simple",
+      "zh": "許多學生負擔不起私人家教的費用。",
+      "reference": [
+        "Many students cannot afford the cost of a private tutor.",
+        "A private tutor is beyond what many students can afford."
+      ],
+      "purpose": "afford 的用法"
+    },
+    {
+      "id": "trans_003",
+      "topic": "education",
+      "level": "beginner",
+      "structure": "compound",
+      "zh": "她決定主修醫學資訊，因為她對資料分析有興趣。",
+      "reference": [
+        "She decided to major in medical informatics because she is interested in data analysis.",
+        "Her interest in data analysis led her to major in medical informatics."
+      ],
+      "purpose": "because 引導的原因子句"
+    },
+    {
+      "id": "trans_004",
+      "topic": "education",
+      "level": "intermediate",
+      "structure": "relative-clause",
+      "zh": "那位發表這篇論文的研究員目前在新加坡工作。",
+      "reference": [
+        "The researcher who published this paper is currently working in Singapore.",
+        "The researcher behind this paper is now based in Singapore."
+      ],
+      "purpose": "主格關係代名詞"
+    },
+    {
+      "id": "trans_005",
+      "topic": "environment",
+      "level": "intermediate",
+      "structure": "compound",
+      "zh": "除非政府提高補貼，否則太陽能產業很難持續成長。",
+      "reference": [
+        "Unless the government increases subsidies, the solar industry will struggle to keep growing.",
+        "The solar industry will find it hard to sustain growth unless subsidies are raised."
+      ],
+      "purpose": "unless 條件句與主要子句時態搭配"
+    },
+    {
+      "id": "trans_006",
+      "topic": "medicine",
+      "level": "intermediate",
+      "structure": "relative-clause",
+      "zh": "這間醫院去年引進的系統已經縮短了三成的候診時間。",
+      "reference": [
+        "The system the hospital introduced last year has already cut waiting times by thirty percent.",
+        "The system that was introduced by the hospital last year has reduced waiting times by thirty percent."
+      ],
+      "purpose": "受格關係代名詞省略、by + 百分比表示幅度"
+    },
+    {
+      "id": "trans_007",
+      "topic": "education",
+      "level": "intermediate",
+      "structure": "inversion",
+      "zh": "他不但通過了考試，還拿到了全班最高分。",
+      "reference": [
+        "Not only did he pass the exam, but he also earned the highest score in the class.",
+        "He not only passed the exam but also got the highest score in the class."
+      ],
+      "purpose": "Not only 置句首的倒裝"
+    },
+    {
+      "id": "trans_008",
+      "topic": "psychology",
+      "level": "intermediate",
+      "structure": "comparative",
+      "zh": "比起死記硬背，理解概念更能幫助你長期記住。",
+      "reference": [
+        "Understanding concepts helps you remember in the long run far more than rote memorization does.",
+        "Grasping the concepts is far better for long-term retention than memorizing by rote."
+      ],
+      "purpose": "比較級與代動詞 does"
+    },
+    {
+      "id": "trans_009",
+      "topic": "economics",
+      "level": "intermediate",
+      "structure": "participle",
+      "zh": "考慮到時間有限，我們決定先處理最重要的部分。",
+      "reference": [
+        "Given the limited time, we decided to handle the most important part first.",
+        "Since time was limited, we chose to deal with the most critical part first."
+      ],
+      "purpose": "Given 引導的分詞片語"
+    },
+    {
+      "id": "trans_010",
+      "topic": "medicine",
+      "level": "advanced",
+      "structure": "participle",
+      "zh": "由於缺乏長期追蹤資料，研究團隊無法確認這項療法的副作用。",
+      "reference": [
+        "Owing to the absence of long-term follow-up data, the research team could not confirm the side effects of the treatment.",
+        "Lacking long-term follow-up data, the team was unable to verify the treatment's side effects."
+      ],
+      "purpose": "原因型分詞構句與正式介系詞片語"
+    },
+    {
+      "id": "trans_011",
+      "topic": "psychology",
+      "level": "advanced",
+      "structure": "subjunctive",
+      "zh": "如果當初有更多受試者參與，結果可能會完全不同。",
+      "reference": [
+        "Had more participants been involved, the results might have been completely different.",
+        "If more participants had taken part, the results could have been entirely different."
+      ],
+      "purpose": "與過去事實相反的假設，含 if 省略倒裝"
+    },
+    {
+      "id": "trans_012",
+      "topic": "medicine",
+      "level": "advanced",
+      "structure": "compound",
+      "zh": "這位教授的研究不僅改變了臨床實務，也重新定義了這個領域的研究方法。",
+      "reference": [
+        "The professor's work has not only changed clinical practice but also redefined how research in the field is conducted.",
+        "Her research has both transformed clinical practice and reshaped the field's research methods."
+      ],
+      "purpose": "not only ... but also 的動詞平行"
+    },
+    {
+      "id": "trans_013",
+      "topic": "technology",
+      "level": "advanced",
+      "structure": "inversion",
+      "zh": "幾乎沒有人料到這項技術會在五年內被淘汰。",
+      "reference": [
+        "Hardly anyone anticipated that the technology would become obsolete within five years.",
+        "Few people expected the technology to be rendered obsolete within five years."
+      ],
+      "purpose": "否定意味主詞與 obsolete 的搭配"
+    },
+    {
+      "id": "trans_014",
+      "topic": "education",
+      "level": "advanced",
+      "structure": "compound",
+      "zh": "無論結果如何，這次的實驗都提供了寶貴的經驗。",
+      "reference": [
+        "Whatever the outcome, the experiment provided valuable experience.",
+        "Regardless of the result, the experiment was a valuable learning experience."
+      ],
+      "purpose": "Whatever 引導的讓步省略句"
+    },
+    {
+      "id": "trans_015",
+      "topic": "history",
+      "level": "advanced",
+      "structure": "cleft",
+      "zh": "正是因為資料不完整，這項結論才受到如此多的質疑。",
+      "reference": [
+        "It is precisely because the data were incomplete that the conclusion has drawn so much criticism.",
+        "The conclusion has been questioned so heavily precisely because the data were incomplete."
+      ],
+      "purpose": "It is because ... that ... 的強調句"
+    }
+  ],
+  "speaking": [
+    {
+      "id": "sp_lr_001",
+      "type": "listen_repeat",
+      "level": "intermediate",
+      "topic": "education",
+      "sceneDescription": "辦公室茶水間：牆上貼著咖啡機使用說明，流理台上放著馬克杯和一台微波爐。",
+      "instruction": "聽每一句話後立刻原句複誦，每句只播一次，螢幕上不會顯示文字。",
+      "sentences": [
+        "Please rinse your mug before you put it on the rack.",
+        "The coffee machine needs about thirty seconds to warm up.",
+        "Don't leave food in the microwave after you heat it.",
+        "There are clean towels in the cabinet under the sink.",
+        "We restock the filters every Monday morning.",
+        "If the machine beeps twice, the water tank is empty.",
+        "Let me know if anything in here runs out."
+      ],
+      "purpose": "功能詞（before, after, if）與弱讀音節的聽辨準確度"
+    },
+    {
+      "id": "sp_lr_002",
+      "type": "listen_repeat",
+      "level": "intermediate",
+      "topic": "education",
+      "sceneDescription": "圖書館一樓服務台：後方有還書箱與自助借書機，牆上掛著開放時間告示。",
+      "instruction": "聽每一句話後立刻原句複誦，每句只播一次，螢幕上不會顯示文字。",
+      "sentences": [
+        "You can return books at the drop box by the entrance.",
+        "The self-checkout machine is faster than waiting in line.",
+        "Study rooms must be booked at least one day in advance.",
+        "We close at nine on weekdays and six on weekends.",
+        "Please keep your voice down in the reading area.",
+        "Your library card expires at the end of the semester.",
+        "Ask at the desk if you can't find a title."
+      ],
+      "purpose": "數字、時間與介系詞片語的聽辨準確度"
+    },
+    {
+      "id": "sp_int_001",
+      "type": "interview",
+      "level": "intermediate",
+      "topic": "education",
+      "prompt": "Some students prefer to study alone, while others prefer studying in groups. Which do you prefer, and why?",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "偏好表態 + 理由展開"
+    },
+    {
+      "id": "sp_int_002",
+      "type": "interview",
+      "level": "beginner",
+      "topic": "arts",
+      "prompt": "Describe a place in your hometown that you would recommend to a visitor. Explain what makes it worth seeing.",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "描述能力與具體細節"
+    },
+    {
+      "id": "sp_int_003",
+      "type": "interview",
+      "level": "advanced",
+      "topic": "education",
+      "prompt": "Do you think universities should require all students to take a basic statistics course? Why or why not?",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "政策立場與反方讓步"
+    },
+    {
+      "id": "sp_int_004",
+      "type": "interview",
+      "level": "intermediate",
+      "topic": "technology",
+      "prompt": "Tell me about a skill you have learned recently. How did you learn it, and how useful has it been?",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "過去經驗敘述與時態控制"
+    },
+    {
+      "id": "sp_ind_001",
+      "type": "independent",
+      "level": "intermediate",
+      "topic": "technology",
+      "prompt": "Some people believe that technology has made people less patient. Do you agree or disagree? Use specific reasons and examples to support your answer.",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "同意與否的論點組織"
+    },
+    {
+      "id": "sp_ind_002",
+      "type": "independent",
+      "level": "intermediate",
+      "topic": "education",
+      "prompt": "Your university is considering replacing all printed textbooks with digital ones. Do you support this change? Explain your reasons.",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "校園情境的利弊評估"
+    },
+    {
+      "id": "sp_ind_003",
+      "type": "independent",
+      "level": "advanced",
+      "topic": "psychology",
+      "prompt": "Which is more important for success at university: time management or intelligence? Explain your choice.",
+      "prepSeconds": 15,
+      "speakSeconds": 45,
+      "purpose": "二選一比較與取捨說明"
+    }
+  ],
+  "writeEmail": [
+    {
+      "id": "em_001",
+      "level": "intermediate",
+      "topic": "education",
+      "situation": "你註冊的實驗課與一門必修課時間衝堂。寫信給課程助教說明情況，並詢問是否有其他時段可以調整。",
+      "requirements": [
+        "至少 100 字",
+        "清楚說明衝堂的兩門課與時段",
+        "提出一個具體請求",
+        "禮貌的開頭與結尾"
+      ],
+      "keyPoints": [
+        "I am writing to ask about ...",
+        "unfortunately, the two sessions overlap",
+        "Would it be possible to ...",
+        "Thank you for your time."
+      ],
+      "purpose": "說明問題 + 提出請求的正式 email 結構"
+    },
+    {
+      "id": "em_002",
+      "level": "intermediate",
+      "topic": "education",
+      "situation": "你在圖書館借的書被系統標記為逾期，但你記得已經在期限前歸還。寫信給圖書館說明情況並詢問處理方式。",
+      "requirements": [
+        "至少 100 字",
+        "說明書名與你記得的歸還時間",
+        "說明你希望對方做什麼",
+        "語氣要有禮但立場清楚"
+      ],
+      "keyPoints": [
+        "According to my records, I returned ...",
+        "I may be mistaken, but ...",
+        "Could you check whether ...",
+        "I would appreciate it if ..."
+      ],
+      "purpose": "提出異議但保持禮貌的語氣拿捏"
+    },
+    {
+      "id": "em_003",
+      "level": "advanced",
+      "topic": "medicine",
+      "situation": "你想申請加入某位教授的研究團隊。寫信自我介紹，說明你的相關經驗與為什麼對這個主題有興趣。",
+      "requirements": [
+        "至少 120 字",
+        "簡短自我介紹（系級與背景）",
+        "提出至少兩項相關經驗",
+        "說明你能貢獻什麼，而不只是你想學什麼"
+      ],
+      "keyPoints": [
+        "I am a third-year student majoring in ...",
+        "I came across your recent work on ...",
+        "In a previous project, I ...",
+        "I would be glad to contribute by ..."
+      ],
+      "purpose": "自我推薦信的重點排序與具體化"
+    }
+  ]
+};
+
+/* ---------- 設定 ---------- */
+const CFG = {
+  DB_NAME:"toefl_practice", DB_VERSION:1,
+  AI_MODEL:"claude-sonnet-5",
+  AI_ENDPOINT:"https://api.anthropic.com/v1/messages",
+  AUDIO_KEEP_SESSIONS:20,
+  BACKUP_REMIND_DAYS:14,
+};
+const TOPIC_ZH={medicine:"醫學健康",environment:"環境科學",psychology:"心理學",
+  economics:"經濟商業",technology:"科技工程",history:"歷史人文",education:"教育",arts:"藝術"};
+const LEVEL_ZH={beginner:"初級",intermediate:"中級",advanced:"進階"};
+const ERRTYPE_ZH={tense:"時態",article:"冠詞",preposition:"介系詞",agreement:"主謂一致",
+  collocation:"搭配詞",structure:"句構",meaning:"語意",'word-form':"詞性",connector:"連接詞"};
+
+/* ============================================================
+   Util
+   ============================================================ */
+const Util={
+  $(sel,root){return (root||document).querySelector(sel);},
+  el(tag,attrs,kids){
+    const e=document.createElement(tag);
+    if(attrs)for(const k in attrs){
+      if(k==="class")e.className=attrs[k];
+      else if(k==="html")e.innerHTML=attrs[k];
+      else if(k==="text")e.textContent=attrs[k];
+      else if(k.startsWith("on")&&typeof attrs[k]==="function")e.addEventListener(k.slice(2),attrs[k]);
+      else if(attrs[k]!=null)e.setAttribute(k,attrs[k]);
+    }
+    (kids||[]).forEach(c=>{if(c==null)return;e.appendChild(typeof c==="string"?document.createTextNode(c):c);});
+    return e;
+  },
+  debounce(fn,ms){let t;return function(){clearTimeout(t);const a=arguments,c=this;t=setTimeout(()=>fn.apply(c,a),ms);};},
+  esc(s){return String(s==null?"":s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));},
+  now(){return new Date().toISOString();},
+  stamp(d){d=d||new Date();const p=n=>String(n).padStart(2,"0");
+    return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+"_"+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds());},
+  fmtTime(iso){if(!iso)return"";const d=new Date(iso);const p=n=>String(n).padStart(2,"0");
+    return `${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`;},
+  daysBetween(a,b){return Math.floor((b-a)/86400000);},
+  shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;},
+  sample(arr,n){return Util.shuffle(arr).slice(0,n);},
+  uid(){return Math.random().toString(36).slice(2,9);},
+  normWords(s){return String(s||"").toLowerCase().replace(/[^\p{L}\p{N}\s']/gu," ").split(/\s+/).filter(Boolean);},
+  // word-level Levenshtein alignment -> ops array
+  align(a,b){
+    const n=a.length,m=b.length;
+    const dp=Array.from({length:n+1},()=>new Array(m+1).fill(0));
+    for(let i=0;i<=n;i++)dp[i][0]=i;
+    for(let j=0;j<=m;j++)dp[0][j]=j;
+    const near=(x,y)=>{if(x===y)return true;if(Math.abs(x.length-y.length)>1)return false;
+      // 1-edit distance
+      let i=0,j=0,e=0;while(i<x.length&&j<y.length){if(x[i]===y[j]){i++;j++;}else{e++;if(e>1)return false;
+        if(x.length>y.length)i++;else if(y.length>x.length)j++;else{i++;j++;}}}
+      return e+ (x.length-i)+(y.length-j)<=1;};
+    for(let i=1;i<=n;i++)for(let j=1;j<=m;j++){
+      const cost=near(a[i-1],b[j-1])?0:1;
+      dp[i][j]=Math.min(dp[i-1][j]+1,dp[i][j-1]+1,dp[i-1][j-1]+cost);
+    }
+    // backtrace
+    let i=n,j=m;const ops=[];
+    while(i>0||j>0){
+      if(i>0&&j>0&&dp[i][j]===dp[i-1][j-1]+(near(a[i-1],b[j-1])?0:1)){
+        ops.push({t:near(a[i-1],b[j-1])?"match":"sub",a:a[i-1],b:b[j-1]});i--;j--;
+      }else if(i>0&&dp[i][j]===dp[i-1][j]+1){ops.push({t:"del",a:a[i-1]});i--;}
+      else{ops.push({t:"ins",b:b[j-1]});j--;}
+    }
+    ops.reverse();return ops;
+  },
+};
+
+/* ============================================================
+   DB — IndexedDB
+   ============================================================ */
+const DB={
+  db:null,
+  open(){
+    return new Promise((res,rej)=>{
+      const req=indexedDB.open(CFG.DB_NAME,CFG.DB_VERSION);
+      req.onupgradeneeded=e=>{
+        const db=req.result,old=e.oldVersion;
+        if(old<1){
+          db.createObjectStore("sessions",{keyPath:"id"});
+          db.createObjectStore("audio",{keyPath:"audioId"});
+          db.createObjectStore("meta",{keyPath:"key"});
+          const qb=db.createObjectStore("questionBank",{keyPath:"_pk"});
+          qb.createIndex("type","type");
+          qb.createIndex("topic","topic");
+          qb.createIndex("level","level");
+        }
+        // 未來版本遷移放這裡：if(old<2){...}
+      };
+      req.onsuccess=()=>{DB.db=req.result;res(DB.db);};
+      req.onerror=()=>rej(req.error);
+      req.onblocked=()=>alert("請關閉其他開著本網站的分頁後再重試（資料庫升級被佔用）。");
+    });
+  },
+  tx(store,mode){return DB.db.transaction(store,mode||"readonly").objectStore(store);},
+  get(store,key){return new Promise((res,rej)=>{const r=DB.tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});},
+  getAll(store){return new Promise((res,rej)=>{const r=DB.tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});},
+  put(store,val){return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").put(val);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
+  del(store,key){return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
+  clear(store){return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
+  async metaGet(key,def){const v=await DB.get("meta",key);return v?v.value:def;},
+  async metaSet(key,value){await DB.put("meta",{key,value});},
+};
+
+/* ============================================================
+   Bank — 題庫存取 / 匯入 / 驗證 / 抽題
+   ============================================================ */
+const Bank={
+  // 把題庫檔攤平成 questionBank store 的每筆紀錄
+  flatten(bank){
+    const rows=[];const push=(type,arr)=>{(arr||[]).forEach(o=>{
+      // 注意：category(type) 必須蓋過 o 自帶的 type（speaking 物件有 listen_repeat/interview 等），
+      // 原始子類型保留在 subtype。
+      rows.push(Object.assign({},o,{_pk:type+":"+(o.id||Util.uid()),type,subtype:o.type||null}));});};
+    push("vocab",(bank.vocab||[]).map((v,i)=>Object.assign({id:v.id||("v_"+i)},v)));
+    push("completeWords",bank.completeWords);
+    push("dailyLifeReading",bank.dailyLifeReading);
+    push("cloze",bank.cloze);
+    push("buildSentence",bank.buildSentence);
+    push("translation",bank.translation);
+    push("speaking",bank.speaking);
+    push("writeEmail",bank.writeEmail);
+    return rows;
+  },
+  validate(bank){
+    const enums=bank.enums||SEED_BANK.enums;
+    const inEnum=(v,k)=>!v||!enums[k]||enums[k].includes(v);
+    const good=[],skipped=[];
+    const rows=Bank.flatten(bank);
+    rows.forEach(r=>{
+      const reasons=[];
+      if(!r.type)reasons.push("缺 type");
+      if(r.topic&&!inEnum(r.topic,"topic"))reasons.push("topic 不在清單:"+r.topic);
+      if(r.level&&!inEnum(r.level,"level"))reasons.push("level 不在清單:"+r.level);
+      if(r.type==="cloze"&&r.items)r.items.forEach(it=>{if(it.errorType&&!inEnum(it.errorType,"errorType"))reasons.push("errorType:"+it.errorType);});
+      if((r.type==="buildSentence"||r.type==="translation")&&r.structure&&!inEnum(r.structure,"structure"))reasons.push("structure:"+r.structure);
+      if(reasons.length)skipped.push({id:r._pk,reasons});else good.push(r);
+    });
+    return {good,skipped};
+  },
+  async import(bank,mode){
+    const {good,skipped}=Bank.validate(bank);
+    if(mode==="replace")await DB.clear("questionBank");
+    for(const r of good)await DB.put("questionBank",r);
+    await DB.metaSet("bankMeta",{version:bank.version,format:bank.format,importedAt:Util.now()});
+    return {imported:good.length,skipped};
+  },
+  async all(){return await DB.getAll("questionBank");},
+  async byType(type){const rows=await Bank.all();return rows.filter(r=>r.type===type);},
+  async isEmpty(){const rows=await Bank.all();return rows.length===0;},
+  async status(){
+    const rows=await Bank.all();const byType={},topics=new Set(),levels=new Set();
+    rows.forEach(r=>{byType[r.type]=(byType[r.type]||0)+1;if(r.topic)topics.add(r.topic);if(r.level)levels.add(r.level);});
+    return {total:rows.length,byType,topics:[...topics],levels:[...levels]};
+  },
+  // 依主題/難度過濾抽題；level 傳 null 表不限
+  pick(rows,type,topics,level,n){
+    let pool=rows.filter(r=>r.type===type);
+    if(topics&&topics.length)pool=pool.filter(r=>!r.topic||topics.includes(r.topic));
+    let leveled=level?pool.filter(r=>r.level===level):pool;
+    if(leveled.length<n)leveled=pool; // 不夠就放寬難度
+    return Util.sample(leveled,Math.min(n,leveled.length));
+  },
+};
+
+/* ============================================================
+   Session — 當前回合狀態（唯一來源）
+   ============================================================ */
+const Session={
+  cur:null,
+  async list(){const s=await DB.getAll("sessions");return s.sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));},
+  async load(id){Session.cur=await DB.get("sessions",id);return Session.cur;},
+  async save(){if(Session.cur){Session.cur.updatedAt=Util.now();await DB.put("sessions",Session.cur);Persist.flash();}},
+
+  async create(config){
+    const rows=await Bank.all();
+    const level=config.level==="auto"?await Session.autoLevel():config.level;
+    const src=config.source||"mixed";
+    const topics=config.topics;
+    const due=await Review.due();
+
+    // 決定用題庫或生成
+    const wantGen=(t)=>src==="generate"||(src==="mixed"&&["speaking","writeEmail"].includes(t));
+
+    const s={
+      id:"session_"+Util.stamp()+"_"+Util.uid(),
+      createdAt:Util.now(),updatedAt:Util.now(),status:"in_progress",
+      config:{topics,level,source:src},
+      levelUsed:level,
+      vocab:[],reading:{},syntax:{},speaking:{},writing:[],
+      vocabRepetition:{translation:[],interview:[],email:[]},
+      bands:{reading:null,syntax:null,speaking:null,writing:null,overall:null},
+      _reviewNote:[],
+    };
+
+    // --- 單字（含複習）---
+    const revVocab=due.filter(d=>d.type==="vocab").slice(0,3);
+    const vocabRows=Bank.pick(rows,"vocab",topics,level,10-revVocab.length);
+    revVocab.forEach(r=>{const w=rows.find(x=>x._pk===r.itemId);if(w)s.vocab.push(mkVocab(w,true));});
+    vocabRows.forEach(w=>s.vocab.push(mkVocab(w,false)));
+    // 補到10個
+    if(s.vocab.length<10){Bank.pick(rows,"vocab",topics,null,10-s.vocab.length).forEach(w=>s.vocab.push(mkVocab(w,false)));}
+
+    // --- 閱讀 ---
+    const cw=Bank.pick(rows,"completeWords",topics,level,1)[0];
+    const dlr=Bank.pick(rows,"dailyLifeReading",topics,level,1)[0];
+    const cz=Bank.pick(rows,"cloze",topics,level,1)[0];
+    s.reading.completeWords=cw?{srcId:cw._pk,instruction:cw.instruction,passage:cw.passage,
+      items:cw.items.map(it=>({id:it.id,hint:it.hint,answer:it.answer,explanation:it.explanation,purpose:it.purpose,userAnswer:"",revealed:false}))}:null;
+    s.reading.dailyLife=dlr?{srcId:dlr._pk,textType:dlr.textType,passage:dlr.passage,
+      items:dlr.items.map(it=>({id:it.id,question:it.question,options:it.options,answer:it.answer,explanation:it.explanation,purpose:it.purpose,userAnswer:null,revealed:false}))}:null;
+    s.reading.cloze=cz?{srcId:cz._pk,passage:cz.passage,
+      items:cz.items.map(it=>({id:it.id,options:it.options,answer:it.answer,errorType:it.errorType,explanation:it.explanation,purpose:it.purpose,userAnswer:null,revealed:false}))}:null;
+
+    // --- 句構 ---
+    const bs=Bank.pick(rows,"buildSentence",topics,level,5);
+    s.syntax.buildSentence=bs.map(b=>({srcId:b._pk,structure:b.structure,chunks:b.chunks,answer:b.answer,
+      explanation:b.explanation,purpose:b.purpose,userOrder:[],revealed:false,correct:null}));
+    // 翻譯：最多2題複習變體 + 其餘新題
+    const revTrans=due.filter(d=>d.type==="translation").slice(0,2);
+    const usedTransIds=new Set();
+    const tr=[];
+    revTrans.forEach(r=>{const t=rows.find(x=>x._pk===r.itemId);if(t){usedTransIds.add(t._pk);tr.push(mkTrans(t,true));}});
+    Bank.pick(rows,"translation",topics,level,5-tr.length).forEach(t=>{if(!usedTransIds.has(t._pk)){usedTransIds.add(t._pk);tr.push(mkTrans(t,false));}});
+    s.syntax.translation=tr.slice(0,5);
+
+    // --- 口說 ---
+    const spAll=rows.filter(r=>r.type==="speaking");
+    const lrRows=spAll.filter(r=>Array.isArray(r.sentences));           // listen_repeat
+    const otherRows=spAll.filter(r=>!Array.isArray(r.sentences));       // interview / independent
+    const lrByTopic=lrRows.filter(r=>byTopic(r,topics));
+    const lrPick=Util.sample(lrByTopic.length?lrByTopic:lrRows,1)[0];
+    let intPool=otherRows.filter(r=>byTopic(r,topics));
+    if(intPool.length<2)intPool=otherRows;
+    const intUse=Util.sample(intPool,Math.min(3,intPool.length));
+    s.speaking.listenRepeat=lrPick?{srcId:lrPick._pk,sceneDescription:lrPick.sceneDescription,instruction:lrPick.instruction,
+      items:(lrPick.sentences||[]).map((t,i)=>({id:i+1,target:t,audioId:"",transcript:"",score:null,diff:null}))}:null;
+    s.speaking.interview=intUse.map(p=>({srcId:p._pk,interviewType:p.subtype||"interview",prompt:p.prompt,
+      prepSeconds:p.prepSeconds||15,speakSeconds:p.speakSeconds||45,audioId:"",transcript:"",actualSeconds:0,
+      revealed:false,sampleAnswer:"",scores:{content:null,organization:null,language:null,fluency:null},feedback:""}));
+
+    // --- 寫作 ---
+    const em=Bank.pick(rows,"writeEmail",topics,level,1)[0];
+    s.writing=em?[{srcId:em._pk,situation:em.situation,requirements:em.requirements,keyPoints:em.keyPoints,
+      purpose:em.purpose,userAnswer:"",wordCount:0,revealed:false,sampleAnswer:"",
+      scores:{task:null,organization:null,language:null,tone:null},feedback:""}]:[];
+
+    Session.cur=s;await DB.put("sessions",s);
+    return s;
+
+    function mkVocab(w,fromReview){return {word:w.word,pos:w.pos,zh:w.zh,example:w.example,note:w.note,fromReview};}
+    function mkTrans(t,fromReview){return {srcId:t._pk,zh:t.zh,reference:t.reference,structure:t.structure,purpose:t.purpose,
+      userAnswer:"",revealed:false,score:null,errorTypes:[],feedback:"",fromReview};}
+    function byTopic(r,tps){return !r.topic||!tps||!tps.length||tps.includes(r.topic);}
+  },
+
+  async autoLevel(){
+    const list=(await Session.list()).filter(s=>s.status==="completed").slice(0,3);
+    if(list.length<1)return "intermediate";
+    let acc=[];list.forEach(s=>{if(s.bands&&s.bands.overall!=null)acc.push(s._accuracy||0);});
+    const avg=list.reduce((a,s)=>a+(s._accuracy||0),0)/list.length;
+    let base=list[0].config&&list[0].config.level||"intermediate";
+    const order=["beginner","intermediate","advanced"];
+    let i=order.indexOf(base);if(i<0)i=1;
+    if(avg>0.9&&i<2)i++;else if(avg<0.6&&i>0)i--;
+    return order[i];
+  },
+};
+
+/* ============================================================
+   Persist — 自動儲存
+   ============================================================ */
+const Persist={
+  saveDebounced:null,
+  init(){
+    Persist.saveDebounced=Util.debounce(()=>Session.save(),500);
+    const flush=()=>{if(Session.cur)DB.put("sessions",Session.cur);};
+    window.addEventListener("beforeunload",flush);
+    window.addEventListener("pagehide",flush);
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flush();});
+  },
+  touch(){Persist.saveDebounced&&Persist.saveDebounced();},
+  flash(){const e=Util.$("#saveinfo");if(e){const d=new Date();const p=n=>String(n).padStart(2,"0");
+    e.textContent="已儲存 "+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());}},
+};
+
+/* ============================================================
+   Scoring — 百分比與 band
+   ============================================================ */
+const Scoring={
+  band(pct){if(pct==null)return null;let b=1+ (pct/100)*5;b=Math.round(b*2)/2;return Math.max(1,Math.min(6,b));},
+  reading(s){
+    let got=0,tot=0;const r=s.reading;
+    if(r.completeWords)r.completeWords.items.forEach(it=>{tot++;if(norm(it.userAnswer)===norm(it.answer))got++;});
+    if(r.dailyLife)r.dailyLife.items.forEach(it=>{tot++;if(it.userAnswer===it.answer)got++;});
+    if(r.cloze)r.cloze.items.forEach(it=>{tot++;if(it.userAnswer===it.answer)got++;});
+    return tot?{pct:got/tot*100,got,tot}:{pct:null,got:0,tot:0};
+    function norm(x){return String(x||"").trim().toLowerCase();}
+  },
+  syntax(s){
+    let got=0,tot=0;
+    (s.syntax.buildSentence||[]).forEach(b=>{tot+=2;if(b.correct===true)got+=2;});
+    (s.syntax.translation||[]).forEach(t=>{tot+=10;if(t.score!=null)got+=t.score;});
+    return tot?{pct:got/tot*100,got,tot}:{pct:null,got:0,tot:0};
+  },
+  speaking(s){
+    let got=0,tot=0;const sp=s.speaking;
+    if(sp.listenRepeat)sp.listenRepeat.items.forEach(it=>{tot+=3;if(it.score!=null)got+=it.score;});
+    (sp.interview||[]).forEach(iv=>{tot+=20;const sc=iv.scores;const sum=(sc.content||0)+(sc.organization||0)+(sc.language||0)+(sc.fluency||0);got+=sum;});
+    return tot?{pct:got/tot*100,got,tot}:{pct:null,got:0,tot:0};
+  },
+  writing(s){
+    let got=0,tot=0;
+    (s.writing||[]).forEach(w=>{tot+=20;const sc=w.scores;got+=(sc.task||0)+(sc.organization||0)+(sc.language||0)+(sc.tone||0);});
+    return tot?{pct:got/tot*100,got,tot}:{pct:null,got:0,tot:0};
+  },
+  all(s){
+    const r=Scoring.reading(s),sy=Scoring.syntax(s),sp=Scoring.speaking(s),w=Scoring.writing(s);
+    const bands={reading:Scoring.band(r.pct),syntax:Scoring.band(sy.pct),speaking:Scoring.band(sp.pct),writing:Scoring.band(w.pct)};
+    const vals=Object.values(bands).filter(v=>v!=null);
+    bands.overall=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*2)/2:null;
+    return {parts:{reading:r,syntax:sy,speaking:sp,writing:w},bands};
+  },
+};
+
+/* ============================================================
+   Review — Leitner 間隔複習
+   ============================================================ */
+const INTERVALS=[1,3,7,14,30];
+const Review={
+  async queue(){return await DB.metaGet("reviewQueue",[]);},
+  async setQueue(q){await DB.metaSet("reviewQueue",q);},
+  async due(){const q=await Review.queue();const now=Date.now();
+    return q.filter(x=>!x.dueDate||new Date(x.dueDate).getTime()<=now);},
+  async add(item){ // item:{itemId,type,errorType}
+    const q=await Review.queue();
+    let x=q.find(e=>e.itemId===item.itemId&&e.type===item.type);
+    if(x){x.box=1;x.dueDate=Review.next(1);x.history.push({at:Util.now(),result:"wrong"});}
+    else q.push({itemId:item.itemId,type:item.type,errorType:item.errorType||"",box:1,dueDate:Review.next(1),history:[{at:Util.now(),result:"wrong"}]});
+    await Review.setQueue(q);
+  },
+  async pass(itemId,type){
+    const q=await Review.queue();const x=q.find(e=>e.itemId===itemId&&e.type===type);
+    if(x){x.box=Math.min(x.box+1,INTERVALS.length);x.dueDate=Review.next(x.box);x.history.push({at:Util.now(),result:"pass"});await Review.setQueue(q);}
+  },
+  next(box){const days=INTERVALS[Math.max(0,Math.min(box,INTERVALS.length)-1)];
+    return new Date(Date.now()+days*86400000).toISOString();},
+  // 回合結束時掃描錯誤寫入佇列
+  async harvest(s){
+    if(s.reading.cloze)for(const it of s.reading.cloze.items)
+      if(it.userAnswer!=null&&it.userAnswer!==it.answer)await Review.add({itemId:s.reading.cloze.srcId+"#"+it.id,type:"reading",errorType:it.errorType});
+    if(s.reading.dailyLife)for(const it of s.reading.dailyLife.items)
+      if(it.userAnswer!=null&&it.userAnswer!==it.answer)await Review.add({itemId:s.reading.dailyLife.srcId+"#"+it.id,type:"reading",errorType:"meaning"});
+    for(const t of (s.syntax.translation||[]))
+      if(t.score!=null&&t.score<7)await Review.add({itemId:t.srcId,type:"translation",errorType:(t.errorTypes||[])[0]||""});
+    if(s.speaking.listenRepeat)for(const it of s.speaking.listenRepeat.items)
+      if(it.score!=null&&it.score<2)await Review.add({itemId:s.speaking.listenRepeat.srcId+"#"+it.id,type:"speaking",errorType:"meaning"});
+  },
+};
+
+/* ============================================================
+   Stats — 統計（掃描所有 sessions）
+   ============================================================ */
+const Stats={
+  async compute(){
+    const list=(await Session.list());
+    const done=list.filter(s=>s.status==="completed");
+    const trend={reading:[],syntax:[],speaking:[],writing:[],overall:[]};
+    const errCount={};Object.keys(ERRTYPE_ZH).forEach(k=>errCount[k]=0);
+    const repWords={};const lrRates=[];const weak={};
+    done.forEach(s=>{
+      const b=s.bands||{};["reading","syntax","speaking","writing","overall"].forEach(k=>{if(b[k]!=null)trend[k].push({x:s.createdAt,y:b[k]});});
+      if(s.reading&&s.reading.cloze)s.reading.cloze.items.forEach(it=>{if(it.userAnswer!=null&&it.userAnswer!==it.answer&&errCount[it.errorType]!=null)errCount[it.errorType]++;});
+      (s.syntax&&s.syntax.translation||[]).forEach(t=>{(t.errorTypes||[]).forEach(e=>{if(errCount[e]!=null)errCount[e]++;});});
+      ["translation","interview","email"].forEach(sec=>{(s.vocabRepetition&&s.vocabRepetition[sec]||[]).forEach(f=>{repWords[f.word]=(repWords[f.word]||0)+(f.count||1);});});
+      if(s.speaking&&s.speaking.listenRepeat){const its=s.speaking.listenRepeat.items.filter(i=>i.score!=null);
+        if(its.length){const r=its.reduce((a,i)=>a+i.score,0)/(its.length*3);lrRates.push({x:s.createdAt,y:r});}}
+    });
+    // 弱點：同一 errorType 出現在 >=2 回合
+    const errSessions={};done.forEach(s=>{const seen=new Set();
+      if(s.reading&&s.reading.cloze)s.reading.cloze.items.forEach(it=>{if(it.userAnswer!=null&&it.userAnswer!==it.answer)seen.add(it.errorType);});
+      (s.syntax&&s.syntax.translation||[]).forEach(t=>(t.errorTypes||[]).forEach(e=>seen.add(e)));
+      seen.forEach(e=>{if(!e)return;(errSessions[e]=errSessions[e]||[]).push({id:s.id,at:s.createdAt});});});
+    const weakList=Object.entries(errSessions).filter(([e,arr])=>arr.length>=2)
+      .map(([e,arr])=>({errorType:e,sessions:arr})).sort((a,b)=>b.sessions.length-a.sessions.length);
+    const repRank=Object.entries(repWords).sort((a,b)=>b[1]-a[1]).slice(0,10);
+    return {count:done.length,trend,errCount,repRank,lrRates,weakList};
+  },
+};
+
+/* ============================================================
+   Charts — 純 SVG 手刻
+   ============================================================ */
+const Charts={
+  line(series,opts){ // series:[{x:iso,y}], 0..6
+    opts=opts||{};const W=opts.w||520,H=opts.h||180,pad=30;
+    if(!series.length)return Util.el("div",{class:"muted small",text:"尚無資料"});
+    const ys=series.map(p=>p.y);const ymax=opts.ymax||Math.max(6,...ys),ymin=opts.ymin||0;
+    const n=series.length;
+    const px=i=>pad+ (n===1?(W-2*pad)/2:i*(W-2*pad)/(n-1));
+    const py=v=>H-pad-(v-ymin)/(ymax-ymin)*(H-2*pad);
+    let path="";series.forEach((p,i)=>{path+=(i?"L":"M")+px(i).toFixed(1)+" "+py(p.y).toFixed(1)+" ";});
+    const dots=series.map((p,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="3" fill="var(--accent)"/>`).join("");
+    const grid=[0,.25,.5,.75,1].map(f=>{const v=ymin+f*(ymax-ymin);const y=py(v);
+      return `<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`+
+             `<text x="4" y="${y+4}" font-size="10" fill="var(--muted)">${v.toFixed(1)}</text>`;}).join("");
+    const svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">${grid}
+      <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2"/>${dots}</svg>`;
+    return Util.el("div",{html:svg});
+  },
+  bars(pairs,opts){ // pairs:[[label,val]]
+    opts=opts||{};const W=opts.w||520,rowH=26,pad=90;
+    if(!pairs.length)return Util.el("div",{class:"muted small",text:"尚無資料"});
+    const max=Math.max(1,...pairs.map(p=>p[1]));
+    const H=pairs.length*rowH+10;
+    const rows=pairs.map((p,i)=>{const y=i*rowH+8;const w=(W-pad-40)*(p[1]/max);
+      return `<text x="0" y="${y+14}" font-size="12" fill="var(--text)">${Util.esc(p[0])}</text>
+        <rect x="${pad}" y="${y+4}" width="${w.toFixed(1)}" height="14" rx="3" fill="var(--accent)"/>
+        <text x="${pad+w+4}" y="${y+15}" font-size="11" fill="var(--muted)">${p[1]}</text>`;}).join("");
+    return Util.el("div",{html:`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">${rows}</svg>`});
+  },
+};
+
+/* ============================================================
+   Speech — 語音合成 / 辨識 / 錄音
+   ============================================================ */
+const Speech={
+  recSupported(){return !!(window.SpeechRecognition||window.webkitSpeechRecognition);},
+  speak(text){return new Promise(res=>{
+    try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.95;
+      u.onend=()=>res();u.onerror=()=>res();window.speechSynthesis.speak(u);
+      // 保險：估計時間後 resolve
+      setTimeout(res,Math.max(2500,text.length*90));
+    }catch(e){res();}});},
+  // 錄音 + 辨識，maxMs 後或靜音自動停；回傳 {blob,transcript}
+  async capture(maxMs,silenceMs,onInterim){
+    let stream;
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}
+    catch(e){throw new Error("mic-denied");}
+    const chunks=[];let mr=null;
+    try{mr=new MediaRecorder(stream,{mimeType:"audio/webm"});}catch(e){try{mr=new MediaRecorder(stream);}catch(e2){mr=null;}}
+    if(mr){mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};mr.start();}
+    let transcript="",rec=null;
+    const RC=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(RC){rec=new RC();rec.lang="en-US";rec.continuous=true;rec.interimResults=true;
+      rec.onresult=e=>{let fin="",inte="";for(let i=e.resultIndex;i<e.results.length;i++){
+        const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t;else inte+=t;}
+        if(fin)transcript+=fin;onInterim&&onInterim((transcript+" "+inte).trim());};
+      try{rec.start();}catch(e){}}
+    return await new Promise(resolve=>{
+      let done=false,silTimer=null;
+      const finish=()=>{if(done)return;done=true;clearTimeout(hard);clearTimeout(silTimer);
+        try{rec&&rec.stop();}catch(e){}
+        const stopMr=()=>{stream.getTracks().forEach(t=>t.stop());
+          const blob=chunks.length?new Blob(chunks,{type:"audio/webm"}):null;resolve({blob,transcript:transcript.trim()});};
+        if(mr&&mr.state!=="inactive"){mr.onstop=stopMr;mr.stop();}else stopMr();};
+      const hard=setTimeout(finish,maxMs);
+      // 靜音偵測：用辨識間隔近似（每次 onresult 重置）
+      if(rec&&silenceMs){const orig=rec.onresult;rec.onresult=e=>{orig(e);clearTimeout(silTimer);silTimer=setTimeout(finish,silenceMs);};}
+      Speech._stopCurrent=finish;
+    });
+  },
+  stop(){if(Speech._stopCurrent)Speech._stopCurrent();},
+};
+
+/* ============================================================
+   AI — Anthropic API
+   ============================================================ */
+const AI={
+  async key(){return await DB.metaGet("apiKey","");},
+  async setKey(k){await DB.metaSet("apiKey",k);},
+  async has(){return !!(await AI.key());},
+  async call(system,user,maxTokens){
+    const key=await AI.key();
+    if(!key)throw new Error("no-key");
+    const res=await fetch(CFG.AI_ENDPOINT,{method:"POST",headers:{
+      "content-type":"application/json","x-api-key":key,
+      "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:CFG.AI_MODEL,max_tokens:maxTokens||1024,
+        system,messages:[{role:"user",content:user}]})});
+    if(!res.ok){const t=await res.text();throw new Error("api-"+res.status+":"+t.slice(0,200));}
+    const data=await res.json();
+    return (data.content||[]).map(c=>c.text||"").join("");
+  },
+  parseJSON(txt){
+    let t=txt.trim().replace(/^```(json)?/i,"").replace(/```$/,"").trim();
+    const i=t.indexOf("{"),j=t.lastIndexOf("}");
+    if(i>=0&&j>=0)t=t.slice(i,j+1);
+    return JSON.parse(t);
+  },
+  async callJSON(system,user,maxTokens){
+    let txt;try{txt=await AI.call(system,user,maxTokens);}catch(e){throw e;}
+    try{return AI.parseJSON(txt);}catch(e){
+      // 重試一次
+      const txt2=await AI.call(system,user+"\n\n只輸出合法 JSON，不要任何其他文字。",maxTokens);
+      return AI.parseJSON(txt2);
+    }
+  },
+  async gradeTranslation(zh,reference,userAnswer){
+    const sys="你是嚴謹的 TOEFL 寫作評分老師。只輸出 JSON，不要 markdown、不要前言。";
+    const user=`中文原句：${zh}\n參考翻譯：${reference.join(" / ")}\n學生翻譯：${userAnswer}\n\n`+
+      `請評分（滿分10：文法3、詞彙2、句構2、語意2、自然度1），並逐項分析文法/語境/搭配詞。`+
+      `輸出 JSON：{"score":數字,"errorTypes":["tense"...從此清單選:tense,article,preposition,agreement,collocation,structure,meaning,word-form,connector],`+
+      `"verdict":"錯誤|文法對但不自然|可接受|最自然","analysis":"逐項中文分析","better":"更自然的一種說法"}`;
+    return await AI.callJSON(sys,user,900);
+  },
+  async gradeInterview(prompt,transcript,seconds){
+    const sys="你是 TOEFL 口說評分老師。只輸出 JSON。";
+    const user=`題目：${prompt}\n學生作答逐字稿（可能有辨識誤差）：${transcript}\n作答秒數：${seconds}\n\n`+
+      `四維度各5分：content, organization, language, fluency。`+
+      `範例回答請符合中級程度、不要太完美。輸出 JSON：`+
+      `{"scores":{"content":n,"organization":n,"language":n,"fluency":n},"feedback":"中文回饋","sampleAnswer":"英文範例回答","timeComment":"時間與長度是否合理"}`;
+    return await AI.callJSON(sys,user,1100);
+  },
+  async gradeEmail(situation,requirements,text){
+    const sys="你是 TOEFL 寫作評分老師。只輸出 JSON。";
+    const user=`情境：${situation}\n要求：${(requirements||[]).join("；")}\n學生回信：${text}\n\n`+
+      `四維度各5分：task(任務達成), organization, language, tone(語氣得體)。輸出 JSON：`+
+      `{"scores":{"task":n,"organization":n,"language":n,"tone":n},"feedback":"中文回饋","sampleAnswer":"英文範例回信","phrases":["可用句型1","可用句型2"]}`;
+    return await AI.callJSON(sys,user,1200);
+  },
+  async generate(type,examples,topics,level){
+    const sys="你是 TOEFL 2026 新制出題老師。只輸出 JSON，不要 markdown 反引號，不要前言。";
+    const user=`題型：${type}\n主題：${topics.join(",")}\n難度：${level}\n風格範例（僅供參考結構與考點，禁止改寫或重述其內容）：\n`+
+      JSON.stringify(examples).slice(0,3000)+
+      `\n\n產生 1 題結構與考點類似但全新的題目，欄位格式與範例相同（含 explanation 與 purpose）。`+
+      (type.match(/cloze|dailyLife|completeWords/)?`四選一干擾選項只能有一個正確答案，自我檢查其他選項放進句子是否也通順，若通順就換掉。`:``)+
+      `\n只輸出該題的 JSON 物件。`;
+    return await AI.callJSON(sys,user,1500);
+  },
+};
+
+/* ============================================================
+   Vocab repetition — 本地重複用字檢查
+   ============================================================ */
+const LOW_VALUE=["good","bad","important","thing","very","a lot","big","small","nice","get","make","do","say","happy","sad","interesting","help","know"];
+const REPLACE={
+  good:["excellent（更強）","beneficial（正式，有益）","effective（有成效）"],
+  bad:["harmful（有害）","poor（品質差）","detrimental（正式，有損）"],
+  important:["crucial（關鍵）","significant（顯著）","essential（不可或缺）"],
+  thing:["aspect（面向）","factor（因素）","element（要素）"],
+  very:["remarkably（顯著地）","particularly（特別）","highly（高度）"],
+  "a lot":["considerably（相當多）","significantly（顯著）","a great deal"],
+  big:["substantial（可觀）","significant（重大）","considerable（相當大）"],
+  small:["minor（次要）","slight（輕微）","modest（不大的）"],
+  nice:["pleasant（宜人）","appealing（吸引人）","enjoyable（愉快）"],
+  get:["obtain（獲得，正式）","acquire（取得）","receive（收到）"],
+  make:["create（創造）","produce（製造）","generate（產生）"],
+  do:["perform（執行）","carry out（進行）","conduct（進行研究）"],
+  say:["state（陳述）","claim（主張）","argue（論證）"],
+  happy:["pleased（高興）","content（滿足）","delighted（十分開心）"],
+  sad:["upset（難過）","disappointed（失望）","distressed（苦惱）"],
+  interesting:["intriguing（引人入勝）","compelling（有說服力）","fascinating（迷人）"],
+  help:["assist（協助，正式）","support（支持）","facilitate（促進）"],
+  know:["be aware of（知悉）","recognize（認識到）","understand（理解）"],
+};
+const Repet={
+  lemma(w){return w.replace(/'s$/,"").replace(/(ing|ed|er|s)$/,"");},
+  descriptiveOK(w){ // 排除具體名詞的粗略清單（保留描述性字）
+    const nouns=["doctor","professor","hospital","student","teacher","school","city","book","country","company","country","people","water","food","money","time","year","day"];
+    return !nouns.includes(w);
+  },
+  check(text){
+    const words=Util.normWords(text);
+    const counts={};const lowHits={};
+    // 片語 a lot
+    const joined=" "+words.join(" ")+" ";
+    const flags=[];
+    // 低分字（含片語）
+    LOW_VALUE.forEach(lv=>{
+      if(lv.includes(" ")){const c=(joined.match(new RegExp("\\s"+lv.replace(/ /g,"\\s")+"\\s","g"))||[]).length;
+        if(c>=1)flags.push({word:lv,count:c,reason:"low"});}
+    });
+    words.forEach(w=>{const l=Repet.lemma(w);counts[l]=(counts[l]||0)+1;});
+    // 重複>=3（僅描述性）
+    Object.entries(counts).forEach(([l,c])=>{
+      if(LOW_VALUE.includes(l)){flags.push({word:l,count:c,reason:"low"});}
+      else if(c>=3&&Repet.descriptiveOK(l)&&l.length>3){flags.push({word:l,count:c,reason:"repeat"});}
+    });
+    // 去重
+    const seen={};const out=[];
+    flags.forEach(f=>{if(seen[f.word])return;seen[f.word]=1;
+      f.suggestions=REPLACE[f.word]||null;out.push(f);});
+    return out;
+  },
+  // 在原文中把被標記的字上色
+  highlight(text,flags){
+    if(!flags.length)return Util.esc(text);
+    let html=Util.esc(text);
+    flags.forEach(f=>{const re=new RegExp("\\b("+f.word.replace(/ /g,"\\s")+")\\b","gi");
+      html=html.replace(re,'<span class="hl">$1</span>');});
+    return html;
+  },
+};
+
+/* ============================================================
+   Backup — 匯出 / 還原
+   ============================================================ */
+const Backup={
+  blobToB64(blob){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(blob);});},
+  b64ToBlob(d){const [meta,data]=d.split(",");const mime=(meta.match(/:(.*?);/)||[])[1]||"audio/webm";
+    const bin=atob(data);const arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+    return new Blob([arr],{type:mime});},
+  download(obj,name){const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);},
+  async exportAll(includeAudio){
+    const sessions=await DB.getAll("sessions");
+    const meta=await DB.getAll("meta").then(m=>m.filter(x=>x.key!=="apiKey")); // 不匯出金鑰
+    const questionBank=await DB.getAll("questionBank");
+    let audio=[];
+    if(includeAudio){const a=await DB.getAll("audio");for(const r of a)audio.push({audioId:r.audioId,data:await Backup.blobToB64(r.blob)});}
+    Backup.download({version:1,exportedAt:Util.now(),sessions,meta,questionBank,audio},"toefl_backup_"+Util.stamp()+".json");
+  },
+  async exportBank(includeGenerated){
+    let rows=await DB.getAll("questionBank");
+    if(!includeGenerated)rows=rows.filter(r=>!r._generated);
+    Backup.download({version:"1.0",format:"TOEFL iBT 2026",exportedAt:Util.now(),rows},
+      "questionBank_"+Util.stamp().slice(0,8)+".json");
+  },
+  async restore(obj){
+    if(!obj.version)throw new Error("備份格式無 version 欄位");
+    await DB.clear("sessions");await DB.clear("audio");await DB.clear("questionBank");
+    for(const s of (obj.sessions||[]))await DB.put("sessions",s);
+    for(const q of (obj.questionBank||[]))await DB.put("questionBank",q);
+    for(const m of (obj.meta||[]))if(m.key!=="apiKey")await DB.put("meta",m);
+    for(const a of (obj.audio||[]))await DB.put("audio",{audioId:a.audioId,blob:Backup.b64ToBlob(a.data)});
+  },
+  async pruneAudio(){
+    const sessions=await Session.list();
+    const keep=new Set();sessions.slice(0,CFG.AUDIO_KEEP_SESSIONS).forEach(s=>collectAudioIds(s,keep));
+    const all=await DB.getAll("audio");
+    for(const a of all)if(!keep.has(a.audioId))await DB.del("audio",a.audioId);
+  },
+};
+function collectAudioIds(s,set){
+  if(s.speaking&&s.speaking.listenRepeat)s.speaking.listenRepeat.items.forEach(i=>i.audioId&&set.add(i.audioId));
+  (s.speaking&&s.speaking.interview||[]).forEach(i=>i.audioId&&set.add(i.audioId));
+}
+
+/* ============================================================
+   Render — 畫面
+   ============================================================ */
+const App={route:"home",tab:0};
+function mount(node){const app=Util.$("#app");app.innerHTML="";app.appendChild(node);}
+
+async function renderHome(){
+  App.route="home";
+  const bank=await Bank.status();
+  const sessions=await Session.list();
+  const lastBackup=await DB.metaGet("lastBackup",null);
+  const hasKey=await AI.has();
+
+  const wrap=Util.el("div",{class:"wrap"});
+  wrap.appendChild(Util.el("div",{class:"topbar"},[
+    Util.el("strong",{text:"TOEFL 練習 · iBT 2026"}),
+    Util.el("span",{class:"grow"}),
+    Util.el("span",{class:"chip",text:hasKey?"AI：已設定金鑰":"AI：未設定（生成/評分停用）"}),
+  ]));
+
+  // 備份提醒
+  if(lastBackup){const days=Util.daysBetween(new Date(lastBackup),new Date());
+    if(days>=CFG.BACKUP_REMIND_DAYS)wrap.appendChild(Util.el("div",{class:"notice",text:`已經 ${days} 天沒有備份了，建議到「資料管理」匯出備份。`}));}
+
+  // 新練習
+  const c1=Util.el("div",{class:"card"});
+  c1.appendChild(Util.el("h2",{text:"新練習"}));
+  c1.appendChild(Util.el("p",{class:"muted small",text:"選擇主題、難度與題目來源，產生一個新回合。"}));
+  c1.appendChild(Util.el("button",{class:"primary",onclick:openNewPracticeModal},["開始新練習"]));
+  if(bank.total===0)c1.appendChild(Util.el("p",{class:"warn small",text:"題庫為空：新練習將自動改用 AI 生成模式（需設定金鑰）。可先到下方「資料管理」載入內建範例題庫。"}));
+  wrap.appendChild(c1);
+
+  // 回合紀錄
+  const c2=Util.el("div",{class:"card"});
+  c2.appendChild(Util.el("h2",{text:"回合紀錄"}));
+  if(!sessions.length)c2.appendChild(Util.el("p",{class:"muted small",text:"尚無回合。"}));
+  sessions.forEach((s,idx)=>{
+    const scored=Scoring.all(s);
+    const comp=completion(s);
+    const row=Util.el("div",{class:"list-row"});
+    row.appendChild(Util.el("div",{class:"grow"},[
+      Util.el("div",{},[Util.el("strong",{text:"#"+(sessions.length-idx)}),
+        " ",Util.el("span",{class:"muted small",text:Util.fmtTime(s.createdAt)}),
+        " ",Util.el("span",{class:"chip",text:(s.config.topics||[]).map(t=>TOPIC_ZH[t]||t).join("、")}),
+        " ",Util.el("span",{class:"chip",text:LEVEL_ZH[s.levelUsed]||s.levelUsed})]),
+      Util.el("div",{class:"small muted",text:`完成度 ${comp}%　狀態：${s.status==="completed"?"已完成":"進行中"}　總評 band ${scored.bands.overall!=null?scored.bands.overall.toFixed(1):"—"}`}),
+    ]));
+    row.appendChild(Util.el("button",{onclick:()=>openSession(s.id)},[s.status==="completed"?"檢視":"繼續填寫"]));
+    row.appendChild(Util.el("button",{class:"ghost",onclick:async()=>{if(confirm("刪除這個回合？")){await DB.del("sessions",s.id);renderHome();}}},["刪除"]));
+    c2.appendChild(row);
+  });
+  wrap.appendChild(c2);
+
+  // 學習統計 / 資料管理入口
+  const c3=Util.el("div",{class:"card"});
+  c3.appendChild(Util.el("h2",{text:"更多"}));
+  c3.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{onclick:renderStats},["學習統計"]),
+    Util.el("button",{onclick:renderData},["資料管理"]),
+  ]));
+  wrap.appendChild(c3);
+
+  // 題庫狀態
+  const c4=Util.el("div",{class:"card"});
+  c4.appendChild(Util.el("h2",{text:"題庫狀態"}));
+  if(bank.total===0)c4.appendChild(Util.el("p",{class:"muted small",text:"題庫為空。"}));
+  else{
+    const names={vocab:"單字",completeWords:"Complete the Words",dailyLifeReading:"Read in Daily Life",cloze:"克漏字",buildSentence:"Build a Sentence",translation:"中翻英",speaking:"口說",writeEmail:"寫作 Email"};
+    const tbl=Util.el("table");tbl.appendChild(Util.el("tr",{},[Util.el("th",{text:"題型"}),Util.el("th",{text:"題數"})]));
+    Object.keys(names).forEach(k=>{if(bank.byType[k])tbl.appendChild(Util.el("tr",{},[Util.el("td",{text:names[k]}),Util.el("td",{text:bank.byType[k]})]));});
+    c4.appendChild(tbl);
+    c4.appendChild(Util.el("p",{class:"muted small",text:"涵蓋主題："+bank.topics.map(t=>TOPIC_ZH[t]||t).join("、")}));
+    c4.appendChild(Util.el("p",{class:"muted small",text:"涵蓋難度："+bank.levels.map(l=>LEVEL_ZH[l]||l).join("、")}));
+  }
+  wrap.appendChild(c4);
+
+  mount(wrap);
+}
+function completion(s){
+  let filled=0,total=0;const t=(a,b)=>{total+=b;filled+=a;};
+  const r=s.reading||{};
+  if(r.completeWords){const its=r.completeWords.items;t(its.filter(i=>i.userAnswer).length,its.length);}
+  if(r.dailyLife){const its=r.dailyLife.items;t(its.filter(i=>i.userAnswer!=null).length,its.length);}
+  if(r.cloze){const its=r.cloze.items;t(its.filter(i=>i.userAnswer!=null).length,its.length);}
+  (s.syntax&&s.syntax.buildSentence||[]).forEach(b=>t(b.userOrder&&b.userOrder.length?1:0,1));
+  (s.syntax&&s.syntax.translation||[]).forEach(t2=>t(t2.userAnswer?1:0,1));
+  if(s.speaking&&s.speaking.listenRepeat)s.speaking.listenRepeat.items.forEach(i=>t(i.transcript?1:0,1));
+  (s.speaking&&s.speaking.interview||[]).forEach(i=>t(i.transcript?1:0,1));
+  (s.writing||[]).forEach(w=>t(w.userAnswer?1:0,1));
+  return total?Math.round(filled/total*100):0;
+}
+
+/* ---------- 新練習設定視窗 ---------- */
+function openNewPracticeModal(){
+  const bg=Util.el("div",{class:"modal-bg"});
+  const m=Util.el("div",{class:"modal"});
+  m.appendChild(Util.el("h2",{text:"新練習設定"}));
+  m.appendChild(Util.el("h3",{text:"主題領域（至少一項）"}));
+  const topicBox=Util.el("div",{});
+  Object.keys(TOPIC_ZH).forEach(k=>{
+    const id="tp_"+k;
+    topicBox.appendChild(Util.el("label",{class:"blk"},[
+      Util.el("input",{type:"checkbox",value:k,id}),
+      " "+TOPIC_ZH[k]]));
+  });
+  m.appendChild(topicBox);
+  m.appendChild(Util.el("h3",{text:"難度"}));
+  const lvl=Util.el("select");[["auto","自動調整"],["beginner","初級"],["intermediate","中級"],["advanced","進階"]]
+    .forEach(([v,t])=>lvl.appendChild(Util.el("option",{value:v,text:t})));lvl.value="intermediate";
+  m.appendChild(lvl);
+  m.appendChild(Util.el("h3",{text:"題目來源"}));
+  const src=Util.el("select");[["mixed","混合（預設）"],["bank","題庫原題"],["generate","AI 生成新題"]]
+    .forEach(([v,t])=>src.appendChild(Util.el("option",{value:v,text:t})));
+  m.appendChild(src);
+  const err=Util.el("p",{class:"bad small"});
+  m.appendChild(err);
+  const btns=Util.el("div",{class:"rec-row"});
+  btns.appendChild(Util.el("button",{class:"primary",onclick:async()=>{
+    const topics=[...topicBox.querySelectorAll("input:checked")].map(i=>i.value);
+    if(!topics.length){err.textContent="請至少選擇一個主題。";return;}
+    let source=src.value;
+    if(await Bank.isEmpty()&&source!=="generate"){source="generate";}
+    if(source==="generate"&&!(await AI.has())){err.textContent="AI 生成需要先在『資料管理』設定 API 金鑰。";return;}
+    bg.remove();
+    await withLoading("產生新回合中…",async()=>{
+      await Session.create({topics,level:lvl.value,source});
+      if(source!=="bank")await maybeGenerate(source);
+    });
+    App.tab=0;renderPractice();
+  }},["產生回合"]));
+  btns.appendChild(Util.el("button",{class:"ghost",onclick:()=>bg.remove()},["取消"]));
+  m.appendChild(btns);
+  bg.appendChild(m);document.body.appendChild(bg);
+}
+
+// 生成模式：對可生成題型嘗試用 AI 產生（失敗則保留題庫題）
+async function maybeGenerate(source){
+  if(!(await AI.has()))return;
+  const s=Session.cur;const rows=await Bank.all();const {topics,level}=s.config;
+  // 只在 generate 或 mixed 的指定部分做，避免太慢：這裡示範對翻譯生成 2 題（mixed）
+  try{
+    if(source==="generate"){
+      // cloze 全生成一題
+      const ex=Bank.pick(rows,"cloze",topics,level,2);
+      if(ex.length){const g=await AI.generate("cloze",ex.map(clean),topics,level);
+        if(g&&g.items){s.reading.cloze={srcId:"gen_"+Util.uid(),passage:g.passage,
+          items:g.items.map(it=>({id:it.id,options:it.options,answer:it.answer,errorType:it.errorType,explanation:it.explanation,purpose:it.purpose,userAnswer:null,revealed:false})),_generated:true};}}
+    }
+    await Session.save();
+  }catch(e){console.warn("生成失敗，改用題庫題",e);}
+  function clean(r){const o=Object.assign({},r);delete o._pk;delete o.type;return o;}
+}
+
+async function withLoading(msg,fn){
+  const bg=Util.el("div",{class:"modal-bg"});
+  bg.appendChild(Util.el("div",{class:"modal"},[Util.el("div",{class:"loading"},[Util.el("span",{class:"spin"}),msg])]));
+  document.body.appendChild(bg);
+  try{await fn();}finally{bg.remove();}
+}
+
+async function openSession(id){await Session.load(id);App.tab=0;renderPractice();}
+
+/* ---------- 練習頁 ---------- */
+const TAB_NAMES=["單字","閱讀","句構與翻譯","口說","寫作"];
+function renderPractice(){
+  const s=Session.cur;if(!s){renderHome();return;}
+  const wrap=Util.el("div",{class:"wrap"});
+  const bar=Util.el("div",{class:"topbar"});
+  bar.appendChild(Util.el("button",{class:"ghost",onclick:async()=>{await Session.save();renderHome();}},["← 首頁"]));
+  bar.appendChild(Util.el("strong",{text:"回合 "+Util.fmtTime(s.createdAt)}));
+  const tabs=Util.el("div",{class:"tabs"});
+  TAB_NAMES.forEach((n,i)=>tabs.appendChild(Util.el("button",{class:(App.tab===i?"active":""),onclick:()=>{App.tab=i;renderPractice();}},[n])));
+  bar.appendChild(tabs);
+  bar.appendChild(Util.el("span",{class:"grow"}));
+  bar.appendChild(Util.el("span",{class:"saveinfo",id:"saveinfo",text:""}));
+  wrap.appendChild(bar);
+
+  const body=Util.el("div",{});
+  wrap.appendChild(body);
+  mount(wrap);
+
+  if(App.tab===0)tabVocab(body,s);
+  else if(App.tab===1)tabReading(body,s);
+  else if(App.tab===2)tabSyntax(body,s);
+  else if(App.tab===3)tabSpeaking(body,s);
+  else if(App.tab===4)tabWriting(body,s);
+}
+
+/* ---- 分頁1 單字 ---- */
+function tabVocab(root,s){
+  const c=Util.el("div",{class:"card"});
+  c.appendChild(Util.el("h2",{text:"單字（只讀，不計分）"}));
+  s.vocab.forEach(v=>{
+    const box=Util.el("div",{class:"list-row"});
+    box.appendChild(Util.el("div",{class:"grow"},[
+      Util.el("div",{},[Util.el("strong",{class:"eng",text:v.word})," ",Util.el("span",{class:"muted small",text:v.pos}),
+        " ",Util.el("span",{text:v.zh}),v.fromReview?Util.el("span",{class:"chip tag-review",text:"複習"}):null]),
+      Util.el("div",{class:"eng small",html:"<em>"+Util.esc(v.example)+"</em>"}),
+      Util.el("div",{class:"muted small",text:v.note}),
+    ]));
+    c.appendChild(box);
+  });
+  root.appendChild(c);
+}
+
+/* ---- 通用：顯示解答按鈕 ---- */
+function revealBlock(getRevealed,setRevealed,buildBody){
+  const wrapEl=Util.el("div",{class:"reveal"});
+  const body=Util.el("div",{});
+  const btn=Util.el("button",{onclick:()=>{
+    const nv=!getRevealed();setRevealed(nv);Persist.touch();
+    body.innerHTML="";if(nv){body.appendChild(buildBody());body.className="reveal-body";}else body.className="";
+    btn.textContent=nv?"收合解答":"顯示解答";
+  }},[getRevealed()?"收合解答":"顯示解答"]);
+  if(getRevealed()){body.appendChild(buildBody());body.className="reveal-body";}
+  wrapEl.appendChild(btn);wrapEl.appendChild(body);
+  return wrapEl;
+}
+
+/* ---- 分頁2 閱讀 ---- */
+function tabReading(root,s){
+  const r=s.reading;
+  // A. Complete the Words
+  if(r.completeWords){
+    const cw=r.completeWords;
+    const c=Util.el("div",{class:"card"});
+    c.appendChild(Util.el("h2",{text:"A. Complete the Words"}));
+    c.appendChild(Util.el("p",{class:"muted small",text:cw.instruction||"把每個空格的單字補完整。"}));
+    const p=Util.el("div",{class:"passage"});
+    const parts=cw.passage.split(/(\{\{\d+\}\})/);
+    parts.forEach(seg=>{
+      const mm=seg.match(/\{\{(\d+)\}\}/);
+      if(mm){const it=cw.items.find(x=>x.id==mm[1]);if(!it){p.appendChild(document.createTextNode(seg));return;}
+        const prefix=(it.hint||"").replace(/_+/g,"");
+        const inp=Util.el("input",{type:"text",class:"blank-input",value:it.userAnswer||"",
+          placeholder:prefix?prefix+"…":"",title:"提示："+it.hint});
+        applyBlankClass(inp,it);
+        inp.addEventListener("input",()=>{it.userAnswer=inp.value;applyBlankClass(inp,it);Persist.touch();});
+        p.appendChild(inp);
+      }else p.appendChild(document.createTextNode(seg));
+    });
+    c.appendChild(p);
+    c.appendChild(revealBlock(()=>cw.items.every(i=>i.revealed),v=>cw.items.forEach(i=>i.revealed=v),()=>{
+      const d=Util.el("div",{});cw.items.forEach(it=>{const ok=norm(it.userAnswer)===norm(it.answer);
+        d.appendChild(Util.el("div",{class:"small"},[Util.el("strong",{class:ok?"ok":"bad",text:it.answer}),
+          " — "+it.explanation+" ",Util.el("span",{class:"muted",text:"🎯 "+it.purpose})]));});return d;}));
+    root.appendChild(c);
+  }
+  // B. Read in Daily Life
+  if(r.dailyLife)root.appendChild(mcqCard("B. Read in Daily Life（"+(r.dailyLife.textType||"")+"）",r.dailyLife));
+  // C. Cloze
+  if(r.cloze)root.appendChild(mcqCard("C. 克漏字",r.cloze,true));
+  if(!r.completeWords&&!r.dailyLife&&!r.cloze)root.appendChild(Util.el("div",{class:"card muted",text:"本回合無閱讀題。"}));
+
+  function applyBlankClass(inp,it){inp.classList.remove("blank-ok","blank-bad");
+    if(it.userAnswer)inp.classList.add(norm(it.userAnswer)===norm(it.answer)?"blank-ok":"blank-bad");}
+  function norm(x){return String(x||"").trim().toLowerCase();}
+}
+function mcqCard(title,block,isCloze){
+  const c=Util.el("div",{class:"card"});
+  c.appendChild(Util.el("h2",{text:title}));
+  if(isCloze){ // 段落含選項空格
+    const p=Util.el("div",{class:"passage"});
+    const parts=block.passage.split(/(\{\{\d+\}\})/);
+    parts.forEach(seg=>{const mm=seg.match(/\{\{(\d+)\}\}/);
+      if(mm){const it=block.items.find(x=>x.id==mm[1]);
+        const sel=Util.el("select",{style:"width:auto;display:inline-block"});
+        sel.appendChild(Util.el("option",{value:"",text:"（"+mm[1]+"）"}));
+        it.options.forEach((o,i)=>sel.appendChild(Util.el("option",{value:i,text:o})));
+        if(it.userAnswer!=null)sel.value=it.userAnswer;
+        sel.addEventListener("change",()=>{it.userAnswer=sel.value===""?null:+sel.value;Persist.touch();});
+        p.appendChild(sel);
+      }else p.appendChild(document.createTextNode(seg));});
+    c.appendChild(p);
+  }else{
+    c.appendChild(Util.el("div",{class:"passage",text:block.passage}));
+  }
+  block.items.forEach(it=>{
+    const q=Util.el("div",{style:"margin-top:12px"});
+    if(it.question)q.appendChild(Util.el("div",{class:"eng",text:it.id+". "+it.question}));
+    if(!isCloze){ // Daily life：按鈕選項
+      it.options.forEach((o,i)=>{
+        const b=Util.el("button",{class:"optbtn"+(it.userAnswer===i?" sel":""),onclick:()=>{
+          it.userAnswer=i;Persist.touch();refreshOpts();}},[String.fromCharCode(65+i)+". "+o]);
+        b._i=i;q.appendChild(b);});
+      function refreshOpts(){[...q.querySelectorAll(".optbtn")].forEach(b=>{b.className="optbtn"+(it.userAnswer===b._i?" sel":"");});}
+    }
+    c.appendChild(q);
+  });
+  c.appendChild(revealBlock(()=>block.items.every(i=>i.revealed),v=>block.items.forEach(i=>i.revealed=v),()=>{
+    const d=Util.el("div",{});block.items.forEach(it=>{const ok=it.userAnswer===it.answer;
+      d.appendChild(Util.el("div",{class:"small",style:"margin:6px 0"},[
+        Util.el("strong",{text:"("+it.id+") 正解："}),Util.el("span",{class:ok?"ok":"bad",text:" "+String.fromCharCode(65+it.answer)+". "+it.options[it.answer]}),
+        it.errorType?Util.el("span",{class:"chip",text:ERRTYPE_ZH[it.errorType]||it.errorType}):null,
+        Util.el("div",{class:"muted",text:it.explanation}),
+        Util.el("div",{class:"muted",text:"🎯 "+it.purpose})]));});return d;}));
+  return c;
+}
+
+/* ---- 分頁3 句構與翻譯 ---- */
+function tabSyntax(root,s){
+  // A. Build a Sentence
+  const c1=Util.el("div",{class:"card"});
+  c1.appendChild(Util.el("h2",{text:"A. Build a Sentence"}));
+  (s.syntax.buildSentence||[]).forEach((b,idx)=>{
+    const box=Util.el("div",{style:"margin:14px 0;border-top:1px solid var(--border);padding-top:10px"});
+    box.appendChild(Util.el("div",{class:"muted small",text:"第 "+(idx+1)+" 題　結構："+(b.structure||"")}));
+    const slot=Util.el("div",{class:"answer-slot"});
+    const pool=Util.el("div",{});
+    const correctOrder=deriveOrder(b.chunks,b.answer);
+    function render(){
+      slot.innerHTML="";pool.innerHTML="";
+      b.userOrder.forEach((ci,pos)=>{slot.appendChild(Util.el("span",{class:"chunk",onclick:()=>{
+        b.userOrder.splice(pos,1);b.correct=null;Persist.touch();render();}},[b.chunks[ci]]));});
+      b.chunks.forEach((ch,ci)=>{const used=b.userOrder.includes(ci);
+        pool.appendChild(Util.el("span",{class:"chunk"+(used?" used":""),onclick:()=>{
+          if(used)return;b.userOrder.push(ci);Persist.touch();render();}},[ch]));});
+    }
+    render();
+    box.appendChild(slot);box.appendChild(pool);
+    const ctl=Util.el("div",{class:"rec-row"});
+    ctl.appendChild(Util.el("button",{onclick:()=>{b.userOrder=[];b.correct=null;Persist.touch();render();}},["重置"]));
+    ctl.appendChild(Util.el("button",{onclick:()=>{
+      b.correct=JSON.stringify(b.userOrder)===JSON.stringify(correctOrder);Persist.touch();
+      msg.textContent=b.correct?"✓ 正確":"✗ 語序不對，可重排或看解答";msg.className=b.correct?"ok small":"bad small";
+    }},["檢查"]));
+    const msg=Util.el("span",{class:"small"});ctl.appendChild(msg);
+    box.appendChild(ctl);
+    box.appendChild(revealBlock(()=>b.revealed,v=>b.revealed=v,()=>Util.el("div",{},[
+      Util.el("div",{class:"eng",html:"<strong>"+Util.esc(b.answer)+"</strong>"}),
+      Util.el("div",{class:"muted small",text:b.explanation}),
+      Util.el("div",{class:"muted small",text:"🎯 "+b.purpose})])));
+    c1.appendChild(box);
+  });
+  root.appendChild(c1);
+
+  // B. 中翻英
+  const c2=Util.el("div",{class:"card"});
+  c2.appendChild(Util.el("h2",{text:"B. 中翻英"}));
+  (s.syntax.translation||[]).forEach((t,idx)=>{
+    const box=Util.el("div",{style:"margin:14px 0;border-top:1px solid var(--border);padding-top:10px"});
+    box.appendChild(Util.el("div",{},[Util.el("strong",{text:(idx+1)+". "}),t.zh,
+      t.fromReview?Util.el("span",{class:"chip tag-review",text:"複習變體"}):null]));
+    const ta=Util.el("textarea",{rows:2,placeholder:"輸入英文翻譯…"});ta.value=t.userAnswer||"";
+    ta.addEventListener("input",()=>{t.userAnswer=ta.value;Persist.touch();});
+    box.appendChild(ta);
+    box.appendChild(revealBlock(()=>t.revealed,v=>t.revealed=v,()=>buildTransReveal(t)));
+    c2.appendChild(box);
+  });
+  // 重複用字檢查（整個中翻英部分）
+  c2.appendChild(repetitionSection("translation",()=> (s.syntax.translation||[]).map(t=>t.userAnswer).join(" "),s));
+  root.appendChild(c2);
+
+  function buildTransReveal(t){
+    const d=Util.el("div",{});
+    d.appendChild(Util.el("div",{class:"small"},[Util.el("strong",{text:"參考翻譯："})]));
+    (t.reference||[]).forEach(r=>d.appendChild(Util.el("div",{class:"eng small",text:"• "+r})));
+    const fb=Util.el("div",{class:"small",style:"margin-top:8px"});
+    d.appendChild(fb);
+    if(t.score!=null){fb.innerHTML=`<strong>評分：${t.score}/10　${t.feedback?Util.esc(t.feedback):""}</strong>`;}
+    else{
+      const b=Util.el("button",{onclick:async()=>{
+        if(!t.userAnswer){alert("尚未作答");return;}
+        if(!(await AI.has())){fb.innerHTML='<span class="warn">未設定 API 金鑰，無法自動評分。以上為參考翻譯。</span>';return;}
+        b.disabled=true;b.textContent="評分中…";
+        try{const g=await AI.gradeTranslation(t.zh,t.reference,t.userAnswer);
+          t.score=g.score;t.errorTypes=g.errorTypes||[];t.feedback=(g.verdict?"["+g.verdict+"] ":"")+(g.analysis||"")+(g.better?"　更佳："+g.better:"");
+          await Session.save();fb.innerHTML=`<strong>評分：${t.score}/10</strong><div class="muted">${Util.esc(t.feedback)}</div>`;
+        }catch(e){fb.innerHTML='<span class="bad">評分失敗：'+Util.esc(e.message)+'</span>';b.disabled=false;b.textContent="AI 評分";}
+      }},["AI 評分（滿分10）"]);
+      d.appendChild(b);
+    }
+    d.appendChild(Util.el("div",{class:"muted small",style:"margin-top:6px",text:"🎯 "+t.purpose}));
+    return d;
+  }
+  function deriveOrder(chunks,answer){
+    const na=answer.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,"");
+    const idx=chunks.map((ch,i)=>{const key=ch.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,"");return {i,pos:na.indexOf(key)};});
+    idx.sort((a,b)=>a.pos-b.pos);
+    return idx.map(x=>x.i);
+  }
+}
+
+/* ---- 重複用字檢查區塊 ---- */
+function repetitionSection(section,getText,s){
+  const wrapEl=Util.el("div",{style:"margin-top:12px"});
+  const btn=Util.el("button",{onclick:()=>{
+    const text=getText();const flags=Repet.check(text);
+    s.vocabRepetition[section]=flags.map(f=>({word:f.word,count:f.count}));Persist.touch();
+    body.innerHTML="";body.className="reveal-body";
+    if(!flags.length){body.appendChild(Util.el("div",{class:"small ok",text:"沒有偵測到明顯的重複或低分用字，很好。"}));return;}
+    body.appendChild(Util.el("div",{class:"small",html:"<strong>原文（標記處為建議替換）：</strong>"}));
+    body.appendChild(Util.el("div",{class:"passage small",html:Repet.highlight(text,flags)}));
+    flags.forEach(f=>{
+      const d=Util.el("div",{class:"small",style:"margin:8px 0"});
+      d.appendChild(Util.el("div",{},[Util.el("strong",{class:"hl",text:f.word}),
+        Util.el("span",{class:"muted",text:" — "+(f.reason==="low"?"低分常用字":"出現 "+f.count+" 次")})]));
+      if(f.suggestions)f.suggestions.forEach(sg=>d.appendChild(Util.el("div",{class:"muted",text:"→ "+sg})));
+      else d.appendChild(Util.el("div",{class:"muted",text:"→ 試著換用更精確的同義字或改寫句型。"}));
+      body.appendChild(d);
+    });
+  }},["用字重複檢查"]);
+  const body=Util.el("div",{});
+  wrapEl.appendChild(Util.el("h3",{text:"用字重複檢查"}));
+  wrapEl.appendChild(btn);wrapEl.appendChild(body);
+  return wrapEl;
+}
+
+/* ---- 分頁4 口說 ---- */
+function tabSpeaking(root,s){
+  if(!Speech.recSupported()){
+    root.appendChild(Util.el("div",{class:"notice",html:"偵測不到瀏覽器語音辨識（需 Chrome / Edge 且連網）。錄音仍可使用；也可用下方「改用打字作答」。"}));
+  }
+  // A. Listen and Repeat
+  const lr=s.speaking.listenRepeat;
+  if(lr){
+    const c=Util.el("div",{class:"card"});
+    c.appendChild(Util.el("h2",{text:"A. Listen and Repeat（"+lr.items.length+" 句）"}));
+    c.appendChild(Util.el("div",{class:"notice small",text:"情境："+lr.sceneDescription}));
+    c.appendChild(Util.el("p",{class:"muted small",text:lr.instruction||"聽每句後立刻複誦，每句只播一次，句子文字不顯示。"}));
+    const status=Util.el("div",{class:"small muted",text:"已完成 "+lr.items.filter(i=>i.transcript).length+" / "+lr.items.length+" 句"});
+    c.appendChild(status);
+    const ctl=Util.el("div",{class:"rec-row"});
+    const interim=Util.el("div",{class:"eng small muted"});
+    let idxNow=lr.items.findIndex(i=>!i.transcript);if(idxNow<0)idxNow=lr.items.length;
+    const playBtn=Util.el("button",{class:"primary",onclick:async()=>{
+      if(idxNow>=lr.items.length){alert("已完成全部句子");return;}
+      playBtn.disabled=true;typeBtn.disabled=true;
+      const it=lr.items[idxNow];
+      ctl.querySelector(".hint").textContent="播放中…";
+      await Speech.speak(it.target);
+      ctl.querySelector(".hint").innerHTML='<span class="dot"></span> 錄音中（複誦）…';
+      try{
+        const {blob,transcript}=await Speech.capture(10000,2000,txt=>interim.textContent=txt);
+        it.transcript=transcript||"(未辨識到語音)";
+        if(blob){it.audioId="au_"+Util.uid();await DB.put("audio",{audioId:it.audioId,blob});}
+        it.score=scoreLR(it.target,it.transcript);
+        idxNow++;await Session.save();
+      }catch(e){ctl.querySelector(".hint").textContent="麥克風無法使用："+e.message;playBtn.disabled=false;typeBtn.disabled=false;return;}
+      interim.textContent="";
+      status.textContent="已完成 "+lr.items.filter(i=>i.transcript).length+" / "+lr.items.length+" 句";
+      ctl.querySelector(".hint").textContent=idxNow<lr.items.length?"準備下一句":"全部完成！可展開檢視 diff";
+      playBtn.disabled=false;typeBtn.disabled=false;
+      if(idxNow>=lr.items.length)renderPractice();
+    }},["播放並複誦下一句"]);
+    const typeBtn=Util.el("button",{onclick:()=>{ // 打字 fallback
+      if(idxNow>=lr.items.length){alert("已完成");return;}
+      const t=prompt("（fallback）請輸入你聽到並複誦的句子：");if(t==null)return;
+      const it=lr.items[idxNow];it.transcript=t;it.score=scoreLR(it.target,t);idxNow++;Session.save();renderPractice();
+    }},["改用打字作答"]);
+    ctl.appendChild(playBtn);ctl.appendChild(typeBtn);ctl.appendChild(Util.el("span",{class:"hint small muted"}));
+    c.appendChild(ctl);c.appendChild(interim);
+    // 全部完成才顯示 diff
+    if(lr.items.every(i=>i.transcript)){
+      c.appendChild(revealBlock(()=>lr._revealed,v=>lr._revealed=v,()=>{
+        const d=Util.el("div",{});
+        lr.items.forEach(it=>{
+          d.appendChild(Util.el("div",{class:"small",style:"margin:8px 0"},[
+            Util.el("strong",{text:"第"+it.id+"句　"+ (it.score!=null?it.score+"/3":"")}),
+            Util.el("div",{class:"eng",html:"目標／你的複誦："}),
+            Util.el("div",{class:"eng",html:renderDiff(it.target,it.transcript)}),
+            Util.el("div",{class:"muted eng small",text:"逐字稿："+it.transcript})]));});
+        return d;}));
+    }else c.appendChild(Util.el("p",{class:"muted small",text:"完成全部句子後才會顯示逐字 diff 與分數。"}));
+    root.appendChild(c);
+  }
+  // B. Interview / Independent
+  (s.speaking.interview||[]).forEach((iv,idx)=>{
+    const c=Util.el("div",{class:"card"});
+    c.appendChild(Util.el("h2",{text:"B. "+(iv.interviewType==="independent"?"Independent Speaking":"Take an Interview")+"　第 "+(idx+1)+" 題"}));
+    c.appendChild(Util.el("div",{class:"eng",text:iv.prompt}));
+    c.appendChild(Util.el("div",{class:"muted small",text:`準備 ${iv.prepSeconds} 秒，作答 ${iv.speakSeconds} 秒`}));
+    const timer=Util.el("div",{class:"timer"});
+    const interim=Util.el("div",{class:"eng small muted"});
+    const ctl=Util.el("div",{class:"rec-row"});
+    const startBtn=Util.el("button",{class:"primary",onclick:async()=>{
+      startBtn.disabled=true;
+      // 準備倒數
+      await countdown(timer,iv.prepSeconds,"準備：");
+      timer.innerHTML='<span class="dot"></span> 作答中…';
+      const t0=Date.now();
+      try{
+        const {blob,transcript}=await Speech.capture(iv.speakSeconds*1000,null,txt=>interim.textContent=txt);
+        iv.actualSeconds=Math.round((Date.now()-t0)/1000);
+        iv.transcript=transcript;
+        if(blob){iv.audioId="au_"+Util.uid();await DB.put("audio",{audioId:iv.audioId,blob});}
+        await Session.save();renderPractice();
+      }catch(e){timer.textContent="麥克風無法使用："+e.message;startBtn.disabled=false;}
+    }},["開始（準備→作答）"]);
+    const stopBtn=Util.el("button",{onclick:()=>Speech.stop()},["提前停止"]);
+    const typeBtn=Util.el("button",{onclick:()=>{const t=prompt("（fallback）輸入你的口說內容逐字稿：",iv.transcript||"");if(t==null)return;iv.transcript=t;Session.save();renderPractice();}},["改用打字作答"]);
+    ctl.appendChild(startBtn);ctl.appendChild(stopBtn);ctl.appendChild(typeBtn);
+    c.appendChild(ctl);c.appendChild(timer);c.appendChild(interim);
+
+    if(iv.transcript){
+      if(iv.audioId){c.appendChild(Util.el("div",{class:"rec-row"},[Util.el("button",{onclick:async()=>{
+        const rec=await DB.get("audio",iv.audioId);if(rec){const a=new Audio(URL.createObjectURL(rec.blob));a.play();}}},["▶ 播放錄音"])]));}
+      c.appendChild(Util.el("div",{class:"small muted",text:`作答 ${iv.actualSeconds||0} 秒，約 ${Util.normWords(iv.transcript).length} 字`}));
+      c.appendChild(Util.el("label",{class:"blk small"},["逐字稿（可手動修正）："]));
+      const ta=Util.el("textarea",{rows:3});ta.value=iv.transcript;
+      ta.addEventListener("input",()=>{iv.transcript=ta.value;Persist.touch();});
+      c.appendChild(ta);
+      c.appendChild(revealBlock(()=>iv.revealed,v=>iv.revealed=v,()=>buildInterviewReveal(iv,s)));
+    }
+    root.appendChild(c);
+  });
+  if(!lr&&!(s.speaking.interview||[]).length)root.appendChild(Util.el("div",{class:"card muted",text:"本回合無口說題。"}));
+}
+function buildInterviewReveal(iv,s){
+  const d=Util.el("div",{});
+  const fb=Util.el("div",{class:"small"});d.appendChild(fb);
+  const render=()=>{
+    if(iv.scores.content!=null){
+      const sc=iv.scores;
+      fb.innerHTML=`<strong>Content ${sc.content}/5　Organization ${sc.organization}/5　Language ${sc.language}/5　Fluency ${sc.fluency}/5</strong>`+
+        `<div class="muted">${Util.esc(iv.feedback||"")}</div>`+
+        (iv.timeComment?`<div class="muted">${Util.esc(iv.timeComment)}</div>`:``)+
+        `<div style="margin-top:8px"><strong>範例回答：</strong></div><div class="eng">${Util.esc(iv.sampleAnswer||"")}</div>`;
+    }
+  };
+  if(iv.scores.content!=null)render();
+  else{
+    const b=Util.el("button",{onclick:async()=>{
+      if(!(await AI.has())){fb.innerHTML='<span class="warn">未設定 API 金鑰，無法自動評分與生成範例。</span>';return;}
+      b.disabled=true;b.textContent="評分中…";
+      try{const g=await AI.gradeInterview(iv.prompt,iv.transcript,iv.actualSeconds);
+        iv.scores=g.scores;iv.feedback=g.feedback;iv.sampleAnswer=g.sampleAnswer;iv.timeComment=g.timeComment;
+        await Session.save();b.remove();render();
+      }catch(e){fb.innerHTML='<span class="bad">評分失敗：'+Util.esc(e.message)+'</span>';b.disabled=false;b.textContent="AI 評分";}
+    }},["AI 評分 + 範例回答"]);
+    d.appendChild(b);
+  }
+  // 重複用字檢查（口說用修正後逐字稿）
+  d.appendChild(repetitionSection("interview",()=>iv.transcript||"",s));
+  return d;
+}
+
+/* ---- 分頁5 寫作 ---- */
+function tabWriting(root,s){
+  if(!(s.writing||[]).length){root.appendChild(Util.el("div",{class:"card muted",text:"本回合無寫作題。"}));return;}
+  s.writing.forEach((w,idx)=>{
+    const c=Util.el("div",{class:"card"});
+    c.appendChild(Util.el("h2",{text:"Write an Email"}));
+    c.appendChild(Util.el("div",{class:"eng",text:w.situation}));
+    c.appendChild(Util.el("h3",{text:"要求"}));
+    const ul=Util.el("ul");(w.requirements||[]).forEach(r=>ul.appendChild(Util.el("li",{class:"small",text:r})));c.appendChild(ul);
+    const wc=Util.el("div",{class:"small muted",text:"字數："+(w.wordCount||0)});
+    const ta=Util.el("textarea",{rows:10,placeholder:"在此撰寫你的回信…"});ta.value=w.userAnswer||"";
+    ta.addEventListener("input",()=>{w.userAnswer=ta.value;w.wordCount=Util.normWords(ta.value).length;wc.textContent="字數："+w.wordCount;Persist.touch();});
+    c.appendChild(ta);c.appendChild(wc);
+    c.appendChild(revealBlock(()=>w.revealed,v=>w.revealed=v,()=>buildEmailReveal(w,s)));
+    root.appendChild(c);
+  });
+}
+function buildEmailReveal(w,s){
+  const d=Util.el("div",{});
+  const fb=Util.el("div",{class:"small"});d.appendChild(fb);
+  const render=()=>{if(w.scores.task!=null){const sc=w.scores;
+    fb.innerHTML=`<strong>任務達成 ${sc.task}/5　組織 ${sc.organization}/5　語言 ${sc.language}/5　語氣 ${sc.tone}/5</strong>`+
+      `<div class="muted">${Util.esc(w.feedback||"")}</div>`+
+      `<div style="margin-top:8px"><strong>範例回信：</strong></div><div class="eng">${Util.esc(w.sampleAnswer||"")}</div>`+
+      (w.phrases&&w.phrases.length?`<div style="margin-top:8px"><strong>可用句型：</strong></div>`+w.phrases.map(p=>`<div class="eng muted">• ${Util.esc(p)}</div>`).join(""):``);}};
+  if(w.scores.task!=null)render();
+  else{const b=Util.el("button",{onclick:async()=>{
+    if(!w.userAnswer){alert("尚未作答");return;}
+    if(!(await AI.has())){fb.innerHTML='<span class="warn">未設定 API 金鑰，無法自動評分與生成範例。</span>';return;}
+    b.disabled=true;b.textContent="評分中…";
+    try{const g=await AI.gradeEmail(w.situation,w.requirements,w.userAnswer);
+      w.scores=g.scores;w.feedback=g.feedback;w.sampleAnswer=g.sampleAnswer;w.phrases=g.phrases||[];
+      await Session.save();b.remove();render();
+    }catch(e){fb.innerHTML='<span class="bad">評分失敗：'+Util.esc(e.message)+'</span>';b.disabled=false;b.textContent="AI 評分";}
+  }},["AI 評分 + 範例回信"]);d.appendChild(b);}
+  d.appendChild(repetitionSection("email",()=>w.userAnswer||"",s));
+  return d;
+}
+
+/* ---- Listen&Repeat 評分與 diff ---- */
+function scoreLR(target,transcript){
+  const a=Util.normWords(target),b=Util.normWords(transcript);
+  if(!a.length)return 0;
+  const ops=Util.align(a,b);const matched=ops.filter(o=>o.t==="match").length;
+  const ratio=matched/a.length;
+  if(ratio>=0.9)return 3;if(ratio>=0.7)return 2;if(ratio>=0.4)return 1;return 0;
+}
+function renderDiff(target,transcript){
+  const a=Util.normWords(target),b=Util.normWords(transcript);
+  const ops=Util.align(a,b);
+  return ops.map(o=>{
+    if(o.t==="match")return Util.esc(o.b);
+    if(o.t==="del")return '<span class="diff-del">'+Util.esc(o.a)+'</span>';
+    if(o.t==="ins")return '<span class="diff-ins">'+Util.esc(o.b)+'</span>';
+    if(o.t==="sub")return '<span class="diff-del">'+Util.esc(o.a)+'</span> <span class="diff-ins">'+Util.esc(o.b)+'</span>';
+  }).join(" ");
+}
+
+async function countdown(elm,secs,label){
+  return new Promise(res=>{let n=secs;elm.textContent=(label||"")+n;
+    const t=setInterval(()=>{n--;if(n<=0){clearInterval(t);res();}else elm.textContent=(label||"")+n;},1000);});}
+
+/* ---------- 回合結束總評 ---------- */
+async function finishSession(){
+  const s=Session.cur;const {parts,bands}=Scoring.all(s);
+  s.bands=bands;
+  // 準確率供自動難度
+  const tot=parts.reading.tot+parts.syntax.tot+parts.speaking.tot+parts.writing.tot;
+  const got=parts.reading.got+parts.syntax.got+parts.speaking.got+parts.writing.got;
+  s._accuracy=tot?got/tot:0;
+  s.status="completed";
+  await Review.harvest(s);
+  await Session.save();
+  await Backup.pruneAudio();
+  showSummary(s,parts,bands);
+}
+function showSummary(s,parts,bands){
+  const bg=Util.el("div",{class:"modal-bg"});const m=Util.el("div",{class:"modal"});
+  m.appendChild(Util.el("h2",{text:"回合總評"}));
+  m.appendChild(Util.el("div",{class:"band",text:"總評 band "+(bands.overall!=null?bands.overall.toFixed(1):"—")}));
+  m.appendChild(Util.el("p",{class:"muted small",text:"非 ETS 官方換算，僅供自我追蹤。"}));
+  [["reading","閱讀"],["syntax","句構與翻譯"],["speaking","口說"],["writing","寫作"]].forEach(([k,zh])=>{
+    const p=parts[k];
+    m.appendChild(Util.el("div",{class:"scoreline"},[Util.el("span",{text:zh}),
+      Util.el("span",{class:"small muted",text:p.pct!=null?`${p.got}/${p.tot}　band ${bands[k]!=null?bands[k].toFixed(1):"—"}`:"未作答"})]));
+    const bar=Util.el("div",{class:"bar"});bar.appendChild(Util.el("i",{style:"width:"+(p.pct||0)+"%"}));m.appendChild(bar);
+  });
+  m.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:()=>{bg.remove();renderHome();}},["回首頁"]),
+    Util.el("button",{class:"ghost",onclick:()=>bg.remove()},["繼續檢視"]),
+  ]));
+  bg.appendChild(m);document.body.appendChild(bg);
+}
+
+/* ---------- 學習統計頁 ---------- */
+async function renderStats(){
+  const st=await Stats.compute();
+  const wrap=Util.el("div",{class:"wrap"});
+  wrap.appendChild(Util.el("div",{class:"topbar"},[Util.el("button",{class:"ghost",onclick:renderHome},["← 首頁"]),Util.el("strong",{text:"學習統計"})]));
+  const c0=Util.el("div",{class:"card"});c0.appendChild(Util.el("h2",{text:"總覽"}));
+  c0.appendChild(Util.el("p",{text:"已完成回合數："+st.count}));wrap.appendChild(c0);
+
+  const c1=Util.el("div",{class:"card"});c1.appendChild(Util.el("h2",{text:"各部分 band 趨勢"}));
+  [["overall","總評"],["reading","閱讀"],["syntax","句構"],["speaking","口說"],["writing","寫作"]].forEach(([k,zh])=>{
+    c1.appendChild(Util.el("h3",{text:zh}));c1.appendChild(Charts.line(st.trend[k],{ymax:6}));});
+  wrap.appendChild(c1);
+
+  const c2=Util.el("div",{class:"card"});c2.appendChild(Util.el("h2",{text:"錯誤類型分布"}));
+  c2.appendChild(Charts.bars(Object.entries(st.errCount).filter(([k,v])=>v>0).map(([k,v])=>[ERRTYPE_ZH[k]||k,v]).sort((a,b)=>b[1]-a[1])));
+  wrap.appendChild(c2);
+
+  const c3=Util.el("div",{class:"card"});c3.appendChild(Util.el("h2",{text:"重複用字排行（前10）"}));
+  c3.appendChild(Charts.bars(st.repRank.map(([w,c])=>[w,c])));
+  wrap.appendChild(c3);
+
+  const c4=Util.el("div",{class:"card"});c4.appendChild(Util.el("h2",{text:"Listen and Repeat 準確率趨勢"}));
+  c4.appendChild(Charts.line(st.lrRates.map(p=>({x:p.x,y:p.y*6})),{ymax:6}));
+  c4.appendChild(Util.el("p",{class:"muted small",text:"（縱軸換算為 0–6 便於比較）"}));
+  wrap.appendChild(c4);
+
+  const c5=Util.el("div",{class:"card"});c5.appendChild(Util.el("h2",{text:"弱點紀錄（跨回合重複錯誤）"}));
+  if(!st.weakList.length)c5.appendChild(Util.el("p",{class:"muted small",text:"目前沒有跨回合重複出現的錯誤類型。"}));
+  st.weakList.forEach(w=>{
+    const d=Util.el("div",{class:"list-row"});
+    d.appendChild(Util.el("div",{class:"grow"},[Util.el("strong",{text:ERRTYPE_ZH[w.errorType]||w.errorType}),
+      Util.el("span",{class:"muted small",text:"　出現於 "+w.sessions.length+" 個回合"})]));
+    w.sessions.forEach(se=>d.appendChild(Util.el("button",{class:"ghost small",onclick:()=>openSession(se.id)},[Util.fmtTime(se.at)])));
+    c5.appendChild(d);
+  });
+  wrap.appendChild(c5);
+  mount(wrap);
+}
+
+/* ---------- 資料管理頁 ---------- */
+async function renderData(){
+  const wrap=Util.el("div",{class:"wrap"});
+  wrap.appendChild(Util.el("div",{class:"topbar"},[Util.el("button",{class:"ghost",onclick:renderHome},["← 首頁"]),Util.el("strong",{text:"資料管理"})]));
+
+  // API 金鑰
+  const ck=Util.el("div",{class:"card"});ck.appendChild(Util.el("h2",{text:"AI（Anthropic API）金鑰"}));
+  ck.appendChild(Util.el("p",{class:"muted small",html:"金鑰僅存在本機瀏覽器（IndexedDB），供 AI 生成題目與評分自由作答使用。<strong>注意：直接從瀏覽器呼叫會帶 <code>anthropic-dangerous-direct-browser-access</code> 標頭，金鑰會暴露在前端，請只在自己的電腦使用。</strong>"}));
+  const keyInp=Util.el("input",{type:"text",placeholder:"sk-ant-..."});keyInp.value=await AI.key();
+  ck.appendChild(keyInp);
+  ck.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:async()=>{await AI.setKey(keyInp.value.trim());alert("已儲存金鑰");}},["儲存金鑰"]),
+    Util.el("button",{class:"ghost",onclick:async()=>{await AI.setKey("");keyInp.value="";alert("已清除");}},["清除"]),
+    Util.el("span",{class:"muted small",text:"模型："+CFG.AI_MODEL}),
+  ]));
+  wrap.appendChild(ck);
+
+  // 題庫匯入
+  const cb=Util.el("div",{class:"card"});cb.appendChild(Util.el("h2",{text:"題庫匯入"}));
+  const modeSel=Util.el("select",{style:"width:auto;display:inline-block"});
+  [["merge","合併（id 相同覆蓋）"],["replace","取代（清空後重建）"]].forEach(([v,t])=>modeSel.appendChild(Util.el("option",{value:v,text:t})));
+  const fileInp=Util.el("input",{type:"file",accept:".json"});
+  const rep=Util.el("div",{class:"small",style:"margin-top:8px"});
+  cb.appendChild(Util.el("div",{class:"rec-row"},[Util.el("span",{class:"small",text:"模式："}),modeSel]));
+  cb.appendChild(fileInp);
+  cb.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:async()=>{
+      const f=fileInp.files[0];if(!f){alert("請先選擇 JSON 檔");return;}
+      const txt=await f.text();let bank;try{bank=JSON.parse(txt);}catch(e){rep.innerHTML='<span class="bad">JSON 解析失敗</span>';return;}
+      // 支援兩種格式：完整題庫檔 或 匯出的 {rows:[...]}
+      if(bank.rows&&!bank.vocab)bank=rowsToBank(bank.rows);
+      await doImport(bank,modeSel.value,rep);
+    }},["從檔案匯入"]),
+    Util.el("button",{onclick:async()=>{await doImport(SEED_BANK,modeSel.value,rep);}},["載入內建範例題庫"]),
+  ]));
+  cb.appendChild(rep);
+  wrap.appendChild(cb);
+
+  // 備份
+  const cbk=Util.el("div",{class:"card"});cbk.appendChild(Util.el("h2",{text:"備份"}));
+  const incAudio=Util.el("input",{type:"checkbox"});
+  const incGen=Util.el("input",{type:"checkbox"});
+  cbk.appendChild(Util.el("label",{class:"blk small"},[incAudio," 匯出全部時包含錄音檔（檔案會變大）"]));
+  cbk.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:async()=>{await Backup.exportAll(incAudio.checked);await DB.metaSet("lastBackup",Util.now());alert("已匯出備份（不含 API 金鑰）");}},["匯出全部"]),
+  ]));
+  cbk.appendChild(Util.el("label",{class:"blk small"},[incGen," 匯出題庫時包含 AI 生成的題目"]));
+  cbk.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{onclick:async()=>{await Backup.exportBank(incGen.checked);}},["匯出題庫"]),
+  ]));
+  const restoreInp=Util.el("input",{type:"file",accept:".json"});
+  cbk.appendChild(Util.el("h3",{text:"還原備份"}));
+  cbk.appendChild(restoreInp);
+  cbk.appendChild(Util.el("div",{class:"rec-row"},[Util.el("button",{class:"ghost",onclick:async()=>{
+    const f=restoreInp.files[0];if(!f){alert("請選擇備份檔");return;}
+    const obj=JSON.parse(await f.text());
+    if(!obj.version){alert("非本程式的備份檔");return;}
+    const n=(obj.sessions||[]).length;
+    if(!confirm(`還原將覆蓋現有資料，共 ${n} 個回合將取代目前內容。確定？`))return;
+    await withLoading("還原中…",()=>Backup.restore(obj));
+    alert("還原完成");renderHome();
+  }},["選擇備份檔並還原"])]));
+  wrap.appendChild(cbk);
+
+  // 危險操作
+  const cd=Util.el("div",{class:"card"});cd.appendChild(Util.el("h2",{text:"清除"}));
+  cd.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"ghost",onclick:async()=>{if(confirm("刪除所有回合與錄音？（題庫保留）")){await DB.clear("sessions");await DB.clear("audio");alert("已清除回合");}}},["清除所有回合"]),
+  ]));
+  wrap.appendChild(cd);
+
+  mount(wrap);
+
+  async function doImport(bank,mode,repEl){
+    await withLoading("匯入中…",async()=>{
+      const res=await Bank.import(bank,mode);
+      let html=`<span class="ok">成功匯入 ${res.imported} 題`+(res.skipped.length?`，跳過 ${res.skipped.length} 題</span>`:"</span>");
+      if(res.skipped.length){html+="<div class='muted'>跳過原因：</div>";
+        res.skipped.slice(0,20).forEach(s=>html+=`<div class="muted small">• ${Util.esc(s.id)}：${Util.esc(s.reasons.join("；"))}</div>`);}
+      repEl.innerHTML=html;
+    });
+  }
+  function rowsToBank(rows){
+    const bank={version:"1.0",enums:SEED_BANK.enums,vocab:[],completeWords:[],dailyLifeReading:[],cloze:[],buildSentence:[],translation:[],speaking:[],writeEmail:[]};
+    rows.forEach(r=>{const o=Object.assign({},r);const t=o.type;delete o._pk;delete o.type;
+      if(bank[t])bank[t].push(o);});
+    return bank;
+  }
+}
+
+/* ---------- 練習頁加上「完成回合」按鈕（注入 topbar 後） ---------- */
+const _origRenderPractice=renderPractice;
+renderPractice=function(){
+  _origRenderPractice();
+  const bar=Util.$(".topbar");
+  if(bar&&Session.cur){
+    const fin=Util.el("button",{onclick:async()=>{if(confirm("結束並計算總評？之後仍可檢視與補評分。"))await finishSession();}},
+      [Session.cur.status==="completed"?"重新計算總評":"完成回合"]);
+    bar.appendChild(fin);
+  }
+};
+
+/* ============================================================
+   啟動
+   ============================================================ */
+(async function(){
+  try{
+    await DB.open();
+    Persist.init();
+    // 首次啟動若題庫為空，靜默載入內建種子（方便直接使用）
+    if(await Bank.isEmpty()){try{await Bank.import(SEED_BANK,"merge");}catch(e){console.warn(e);}}
+    renderHome();
+  }catch(e){
+    document.getElementById("app").innerHTML='<div class="wrap"><div class="card bad">初始化失敗：'+Util.esc(e.message)+'</div></div>';
+  }
+})();
+</script>
