@@ -2933,8 +2933,8 @@ async function renderData(){
   const modelInfo=Util.el("span",{class:"muted small"});
   const refreshProv=()=>{
     if(provSel.value==="gemini"){
-      help.innerHTML="免費取得：到 <strong>aistudio.google.com/app/apikey</strong> 用 Google 帳號登入 → Create API key → 複製（AIza… 開頭）。免費額度有每分鐘/每日上限，個人練習足夠。";
-      keyInp.placeholder="AIza...";modelInfo.textContent="模型："+CFG.GEMINI_MODEL;
+      help.innerHTML="免費取得：到 <strong>aistudio.google.com/app/apikey</strong> 用 Google 帳號登入 → Create API key → 複製（開頭是 <code>AIza…</code> 或新版 <code>AQ.…</code> 皆可）。免費額度有每分鐘/每日上限，個人練習足夠。";
+      keyInp.placeholder="AIza... 或 AQ...";modelInfo.textContent="模型："+CFG.GEMINI_MODEL;
     }else{
       help.innerHTML="到 <strong>console.anthropic.com</strong> 建立金鑰（sk-ant… 開頭），需加值付費額度。";
       keyInp.placeholder="sk-ant-...";modelInfo.textContent="模型："+CFG.AI_MODEL;
