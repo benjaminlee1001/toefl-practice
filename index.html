@@ -1522,6 +1522,39 @@ const TOPIC_ZH={medicine:"醫學健康",environment:"環境科學",psychology:"�
 const LEVEL_ZH={beginner:"初級",intermediate:"中級",advanced:"進階"};
 const ERRTYPE_ZH={tense:"時態",article:"冠詞",preposition:"介系詞",agreement:"主謂一致",
   collocation:"搭配詞",structure:"句構",meaning:"語意",'word-form':"詞性",connector:"連接詞"};
+/* 單字例句的整句中文翻譯（依單字比對，種子題庫 30 字全覆蓋；舊回合亦可回填） */
+const VOCAB_ZH={
+  prevalence:"第二型糖尿病的盛行率在過去十年間於青少年之間急遽上升。",
+  susceptible:"年長者在冬季月份更容易受到呼吸道感染。",
+  alleviate:"這項新療程旨在緩解慢性疼痛，同時不增加鴉片類藥物的劑量。",
+  diagnosis:"及早診斷能顯著提高病患康復的機會。",
+  deplete:"集約農耕可能在短短幾個生長季內就耗盡土壤中的必要養分。",
+  emission:"該市承諾在 2030 年前將碳排放量減少四成。",
+  sustainable:"永續林業讓木材得以採收，同時不破壞生態系統。",
+  habitat:"海平面上升正在摧毀數種候鳥的沿海棲地。",
+  cognitive:"睡眠不足會損害記憶力與注意力等認知功能。",
+  bias:"研究人員採用雙盲設計以消除觀察者偏誤。",
+  reinforce:"稱讚努力而非天賦，能強化孩子挑戰困難任務的意願。",
+  plausible:"雖然她的解釋聽起來貌似合理，數據卻並不支持。",
+  incentive:"退稅為企業投資潔淨能源提供了強烈的誘因。",
+  fluctuate:"油價在第二季期間劇烈波動。",
+  subsidy:"若沒有政府補貼，太陽能產業在早期就會崩潰。",
+  allocate:"委員會將大部分預算分配給了初等教育。",
+  algorithm:"推薦演算法是從使用者點擊的內容學習，而非他們口頭聲稱喜歡的東西。",
+  automate:"醫院已開始將例行排班自動化，以騰出護理人力。",
+  obsolete:"一旦加密電子郵件普及，傳真機便隨之過時。",
+  scalable:"這個原型在單一診所運作良好，卻始終無法擴展到整個醫院網絡。",
+  artifact:"從該遺址出土的文物顯示出一個橫跨三大洲的貿易網絡。",
+  decline:"歷史學家至今仍在爭論是什麼導致了該帝國的衰退。",
+  attribute:"多數學者將這場崩潰歸因於長期乾旱，而非外敵入侵。",
+  prevail:"「地球是平的」這種信念在某些地區盛行了好幾個世紀。",
+  curriculum:"該大學修訂了課程，將資料素養納入所有主修的必修內容。",
+  enroll:"上學期有超過兩千名學生註冊了這門線上統計課程。",
+  rigorous:"這個學程以其嚴謹的研究方法訓練而聞名。",
+  facilitate:"相較於單純的講授，小組討論更能促進深入的理解。",
+  aesthetic:"這棟建築簡樸冷峻的美學風格在落成時使評論家意見分歧。",
+  depict:"這幅壁畫描繪了工人們興建該市第一條鐵路的情景。",
+};
 
 /* ============================================================
    Util
@@ -1706,13 +1739,17 @@ const Session={
       _reviewNote:[],
     };
 
-    // --- 單字（含複習）---
-    const revVocab=due.filter(d=>d.type==="vocab").slice(0,3);
-    const vocabRows=Bank.pick(rows,"vocab",topics,level,10-revVocab.length);
-    revVocab.forEach(r=>{const w=rows.find(x=>x._pk===r.itemId);if(w)s.vocab.push(mkVocab(w,true));});
-    vocabRows.forEach(w=>s.vocab.push(mkVocab(w,false)));
-    // 補到10個
-    if(s.vocab.length<10){Bank.pick(rows,"vocab",topics,null,10-s.vocab.length).forEach(w=>s.vocab.push(mkVocab(w,false)));}
+    // --- 單字（含複習）：保證 10 個不重複，逐層放寬補滿 ---
+    const usedV=new Set();
+    const addVocab=(w,fromReview)=>{if(!w||usedV.has(w._pk)||s.vocab.length>=10)return;usedV.add(w._pk);s.vocab.push(mkVocab(w,fromReview));};
+    const allVocab=rows.filter(r=>r.type==="vocab");
+    const inTopic=w=>!topics.length||!w.topic||topics.includes(w.topic);
+    // 1) 複習字（最多 3）
+    due.filter(d=>d.type==="vocab").slice(0,3).forEach(r=>addVocab(rows.find(x=>x._pk===r.itemId),true));
+    // 2) 同主題同難度 → 3) 同主題不限難度 → 4) 全題庫，逐層補滿到 10
+    Util.shuffle(allVocab.filter(w=>inTopic(w)&&w.level===level)).forEach(w=>addVocab(w,false));
+    Util.shuffle(allVocab.filter(inTopic)).forEach(w=>addVocab(w,false));
+    Util.shuffle(allVocab).forEach(w=>addVocab(w,false));
 
     // --- 閱讀 ---
     const cw=Bank.pick(rows,"completeWords",topics,level,1)[0];
@@ -1761,7 +1798,7 @@ const Session={
     Session.cur=s;await DB.put("sessions",s);
     return s;
 
-    function mkVocab(w,fromReview){return {word:w.word,pos:w.pos,zh:w.zh,example:w.example,note:w.note,fromReview};}
+    function mkVocab(w,fromReview){return {word:w.word,pos:w.pos,zh:w.zh,example:w.example,exampleZh:w.exampleZh||VOCAB_ZH[w.word]||"",note:w.note,fromReview};}
     function mkTrans(t,fromReview){return {srcId:t._pk,zh:t.zh,reference:t.reference,structure:t.structure,purpose:t.purpose,
       userAnswer:"",revealed:false,score:null,errorTypes:[],feedback:"",fromReview};}
     function byTopic(r,tps){return !r.topic||!tps||!tps.length||tps.includes(r.topic);}
@@ -2349,6 +2386,7 @@ function tabVocab(root,s){
       Util.el("div",{},[Util.el("strong",{class:"eng",text:v.word})," ",Util.el("span",{class:"muted small",text:v.pos}),
         " ",Util.el("span",{text:v.zh}),v.fromReview?Util.el("span",{class:"chip tag-review",text:"複習"}):null]),
       Util.el("div",{class:"eng small",html:"<em>"+Util.esc(v.example)+"</em>"}),
+      Util.el("div",{class:"small",text:v.exampleZh||VOCAB_ZH[v.word]||""}),
       Util.el("div",{class:"muted small",text:v.note}),
     ]));
     c.appendChild(box);
