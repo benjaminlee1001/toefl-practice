@@ -1514,6 +1514,8 @@ const CFG = {
   DB_NAME:"toefl_practice", DB_VERSION:1,
   AI_MODEL:"claude-sonnet-5",
   AI_ENDPOINT:"https://api.anthropic.com/v1/messages",
+  GEMINI_MODEL:"gemini-2.5-flash",
+  GEMINI_ENDPOINT:"https://generativelanguage.googleapis.com/v1beta/models/",
   AUDIO_KEEP_SESSIONS:20,
   BACKUP_REMIND_DAYS:14,
 };
@@ -2044,10 +2046,18 @@ const Speech={
 const AI={
   async key(){return await DB.metaGet("apiKey","");},
   async setKey(k){await DB.metaSet("apiKey",k);},
+  async provider(){return await DB.metaGet("aiProvider","gemini");},
+  async setProvider(p){await DB.metaSet("aiProvider",p);},
   async has(){return !!(await AI.key());},
+  async modelName(){return (await AI.provider())==="gemini"?CFG.GEMINI_MODEL:CFG.AI_MODEL;},
   async call(system,user,maxTokens){
     const key=await AI.key();
     if(!key)throw new Error("no-key");
+    const provider=await AI.provider();
+    if(provider==="gemini")return await AI._callGemini(key,system,user,maxTokens);
+    return await AI._callAnthropic(key,system,user,maxTokens);
+  },
+  async _callAnthropic(key,system,user,maxTokens){
     const res=await fetch(CFG.AI_ENDPOINT,{method:"POST",headers:{
       "content-type":"application/json","x-api-key":key,
       "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
@@ -2056,6 +2066,18 @@ const AI={
     if(!res.ok){const t=await res.text();throw new Error("api-"+res.status+":"+t.slice(0,200));}
     const data=await res.json();
     return (data.content||[]).map(c=>c.text||"").join("");
+  },
+  async _callGemini(key,system,user,maxTokens){
+    const url=CFG.GEMINI_ENDPOINT+CFG.GEMINI_MODEL+":generateContent?key="+encodeURIComponent(key);
+    const res=await fetch(url,{method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({
+        system_instruction:{parts:[{text:system}]},
+        contents:[{role:"user",parts:[{text:user}]}],
+        generationConfig:{maxOutputTokens:maxTokens||1024,temperature:0.7}})});
+    if(!res.ok){const t=await res.text();throw new Error("api-"+res.status+":"+t.slice(0,200));}
+    const data=await res.json();
+    const cand=(data.candidates||[])[0];
+    return ((cand&&cand.content&&cand.content.parts)||[]).map(p=>p.text||"").join("");
   },
   parseJSON(txt){
     let t=txt.trim().replace(/^```(json)?/i,"").replace(/```$/,"").trim();
@@ -2897,14 +2919,37 @@ async function renderData(){
   wrap.appendChild(Util.el("div",{class:"topbar"},[Util.el("button",{class:"ghost",onclick:renderHome},["← 首頁"]),Util.el("strong",{text:"資料管理"})]));
 
   // API 金鑰
-  const ck=Util.el("div",{class:"card"});ck.appendChild(Util.el("h2",{text:"AI（Anthropic API）金鑰"}));
-  ck.appendChild(Util.el("p",{class:"muted small",html:"金鑰僅存在本機瀏覽器（IndexedDB），供 AI 生成題目與評分自由作答使用。<strong>注意：直接從瀏覽器呼叫會帶 <code>anthropic-dangerous-direct-browser-access</code> 標頭，金鑰會暴露在前端，請只在自己的電腦使用。</strong>"}));
-  const keyInp=Util.el("input",{type:"text",placeholder:"sk-ant-..."});keyInp.value=await AI.key();
+  const ck=Util.el("div",{class:"card"});ck.appendChild(Util.el("h2",{text:"AI 金鑰（供評分／生成用）"}));
+  const curProvider=await AI.provider();
+  // 供應商選擇
+  ck.appendChild(Util.el("h3",{text:"供應商"}));
+  const provSel=Util.el("select");
+  [["gemini","Google Gemini（免費額度，推薦）"],["anthropic","Anthropic Claude（付費）"]]
+    .forEach(([v,t])=>provSel.appendChild(Util.el("option",{value:v,text:t})));
+  provSel.value=curProvider;
+  ck.appendChild(provSel);
+  const help=Util.el("div",{class:"muted small",style:"margin:8px 0"});
+  const keyInp=Util.el("input",{type:"text"});keyInp.value=await AI.key();
+  const modelInfo=Util.el("span",{class:"muted small"});
+  const refreshProv=()=>{
+    if(provSel.value==="gemini"){
+      help.innerHTML="免費取得：到 <strong>aistudio.google.com/app/apikey</strong> 用 Google 帳號登入 → Create API key → 複製（AIza… 開頭）。免費額度有每分鐘/每日上限，個人練習足夠。";
+      keyInp.placeholder="AIza...";modelInfo.textContent="模型："+CFG.GEMINI_MODEL;
+    }else{
+      help.innerHTML="到 <strong>console.anthropic.com</strong> 建立金鑰（sk-ant… 開頭），需加值付費額度。";
+      keyInp.placeholder="sk-ant-...";modelInfo.textContent="模型："+CFG.AI_MODEL;
+    }
+  };
+  refreshProv();
+  provSel.addEventListener("change",refreshProv);
+  ck.appendChild(help);
+  ck.appendChild(Util.el("h3",{text:"金鑰"}));
   ck.appendChild(keyInp);
+  ck.appendChild(Util.el("p",{class:"muted small",html:"金鑰只存在本機瀏覽器（IndexedDB），不會上傳、不會寫進備份。因為從瀏覽器直接呼叫 API，金鑰會存在前端，<strong>請只在自己的手機／電腦使用</strong>。"}));
   ck.appendChild(Util.el("div",{class:"rec-row"},[
-    Util.el("button",{class:"primary",onclick:async()=>{await AI.setKey(keyInp.value.trim());alert("已儲存金鑰");}},["儲存金鑰"]),
-    Util.el("button",{class:"ghost",onclick:async()=>{await AI.setKey("");keyInp.value="";alert("已清除");}},["清除"]),
-    Util.el("span",{class:"muted small",text:"模型："+CFG.AI_MODEL}),
+    Util.el("button",{class:"primary",onclick:async()=>{await AI.setProvider(provSel.value);await AI.setKey(keyInp.value.trim());alert("已儲存（供應商："+(provSel.value==="gemini"?"Google Gemini":"Anthropic")+"）");}},["儲存"]),
+    Util.el("button",{class:"ghost",onclick:async()=>{await AI.setKey("");keyInp.value="";alert("已清除金鑰");}},["清除金鑰"]),
+    modelInfo,
   ]));
   wrap.appendChild(ck);
 
