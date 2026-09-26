@@ -1555,6 +1555,23 @@ const VOCAB_ZH={
   aesthetic:"這棟建築簡樸冷峻的美學風格在落成時使評論家意見分歧。",
   depict:"這幅壁畫描繪了工人們興建該市第一條鐵路的情景。",
 };
+/* Listen and Repeat 目標句的中文翻譯（依句子比對，種子 14 句全覆蓋） */
+const LR_ZH={
+  "Please rinse your mug before you put it on the rack.":"請先把馬克杯沖洗乾淨，再放到架子上。",
+  "The coffee machine needs about thirty seconds to warm up.":"咖啡機大約需要三十秒暖機。",
+  "Don't leave food in the microwave after you heat it.":"加熱完後別把食物留在微波爐裡。",
+  "There are clean towels in the cabinet under the sink.":"水槽下方的櫃子裡有乾淨的毛巾。",
+  "We restock the filters every Monday morning.":"我們每週一早上會補充濾網。",
+  "If the machine beeps twice, the water tank is empty.":"如果機器嗶兩聲，就表示水箱空了。",
+  "Let me know if anything in here runs out.":"這裡有任何東西用完了就告訴我。",
+  "You can return books at the drop box by the entrance.":"你可以在入口旁的還書箱歸還書籍。",
+  "The self-checkout machine is faster than waiting in line.":"自助借書機比排隊還快。",
+  "Study rooms must be booked at least one day in advance.":"研究室必須至少提前一天預約。",
+  "We close at nine on weekdays and six on weekends.":"我們平日九點關門，週末六點關門。",
+  "Please keep your voice down in the reading area.":"在閱讀區請放低音量。",
+  "Your library card expires at the end of the semester.":"你的借書證會在學期末到期。",
+  "Ask at the desk if you can't find a title.":"如果找不到某本書，請到服務台詢問。",
+};
 
 /* ============================================================
    Util
@@ -1617,9 +1634,14 @@ const Util={
    ============================================================ */
 const DB={
   db:null,
+  mem:false, // true = IndexedDB 被停用，改用記憶體暫存（不持久化）
+  _keyPath:{sessions:"id",audio:"audioId",meta:"key",questionBank:"_pk"},
+  _m:{sessions:new Map(),audio:new Map(),meta:new Map(),questionBank:new Map()},
   open(){
-    return new Promise((res,rej)=>{
-      const req=indexedDB.open(CFG.DB_NAME,CFG.DB_VERSION);
+    return new Promise((res)=>{
+      let req;
+      try{req=indexedDB.open(CFG.DB_NAME,CFG.DB_VERSION);}
+      catch(e){DB.mem=true;console.warn("IndexedDB 停用，改用記憶體模式：",e);return res(null);}
       req.onupgradeneeded=e=>{
         const db=req.result,old=e.oldVersion;
         if(old<1){
@@ -1634,16 +1656,16 @@ const DB={
         // 未來版本遷移放這裡：if(old<2){...}
       };
       req.onsuccess=()=>{DB.db=req.result;res(DB.db);};
-      req.onerror=()=>rej(req.error);
+      req.onerror=()=>{DB.mem=true;console.warn("IndexedDB 開啟被拒，改用記憶體模式：",req.error);res(null);};
       req.onblocked=()=>alert("請關閉其他開著本網站的分頁後再重試（資料庫升級被佔用）。");
     });
   },
   tx(store,mode){return DB.db.transaction(store,mode||"readonly").objectStore(store);},
-  get(store,key){return new Promise((res,rej)=>{const r=DB.tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});},
-  getAll(store){return new Promise((res,rej)=>{const r=DB.tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});},
-  put(store,val){return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").put(val);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
-  del(store,key){return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
-  clear(store){return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
+  get(store,key){if(DB.mem)return Promise.resolve(DB._m[store].get(key));return new Promise((res,rej)=>{const r=DB.tx(store).get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});},
+  getAll(store){if(DB.mem)return Promise.resolve([...DB._m[store].values()]);return new Promise((res,rej)=>{const r=DB.tx(store).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>rej(r.error);});},
+  put(store,val){if(DB.mem){DB._m[store].set(val[DB._keyPath[store]],val);return Promise.resolve();}return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").put(val);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
+  del(store,key){if(DB.mem){DB._m[store].delete(key);return Promise.resolve();}return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").delete(key);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
+  clear(store){if(DB.mem){DB._m[store].clear();return Promise.resolve();}return new Promise((res,rej)=>{const r=DB.tx(store,"readwrite").clear();r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});},
   async metaGet(key,def){const v=await DB.get("meta",key);return v?v.value:def;},
   async metaSet(key,value){await DB.put("meta",{key,value});},
 };
@@ -2061,9 +2083,10 @@ const AI={
     const sys="你是 TOEFL 口說評分老師。只輸出 JSON。";
     const user=`題目：${prompt}\n學生作答逐字稿（可能有辨識誤差）：${transcript}\n作答秒數：${seconds}\n\n`+
       `四維度各5分：content, organization, language, fluency。`+
-      `範例回答請符合中級程度、不要太完美。輸出 JSON：`+
-      `{"scores":{"content":n,"organization":n,"language":n,"fluency":n},"feedback":"中文回饋","sampleAnswer":"英文範例回答","timeComment":"時間與長度是否合理"}`;
-    return await AI.callJSON(sys,user,1100);
+      `sampleAnswer 是符合中級程度的英文標準解答（不要太完美）。`+
+      `improvements 是針對「這位學生自己的答案」的具體修改建議（指出可改進處與更好的說法，2–4 條，中文，可夾英文例句）。輸出 JSON：`+
+      `{"scores":{"content":n,"organization":n,"language":n,"fluency":n},"feedback":"中文整體回饋","improvements":["建議1","建議2"],"sampleAnswer":"英文標準解答","timeComment":"時間與長度是否合理"}`;
+    return await AI.callJSON(sys,user,1300);
   },
   async gradeEmail(situation,requirements,text){
     const sys="你是 TOEFL 寫作評分老師。只輸出 JSON。";
@@ -2210,6 +2233,9 @@ async function renderHome(){
     Util.el("span",{class:"grow"}),
     Util.el("span",{class:"chip",text:hasKey?"AI：已設定金鑰":"AI：未設定（生成/評分停用）"}),
   ]));
+
+  // 記憶體模式警示（IndexedDB 被停用）
+  if(DB.mem)wrap.appendChild(Util.el("div",{class:"notice",html:"⚠️ 目前為「記憶體暫存模式」：瀏覽器的網站資料/IndexedDB 被停用（常見於無痕視窗、或封鎖所有 cookie/網站資料）。你仍可練習，但<strong>關閉分頁後資料不會保留</strong>。請改用一般視窗並允許本站的網站資料。"}));
 
   // 備份提醒
   if(lastBackup){const days=Util.daysBetween(new Date(lastBackup),new Date());
@@ -2605,57 +2631,55 @@ function tabSpeaking(root,s){
   if(!Speech.recSupported()){
     root.appendChild(Util.el("div",{class:"notice",html:"偵測不到瀏覽器語音辨識（需 Chrome / Edge 且連網）。錄音仍可使用；也可用下方「改用打字作答」。"}));
   }
-  // A. Listen and Repeat
+  // A. Listen and Repeat（每句獨立操作）
   const lr=s.speaking.listenRepeat;
   if(lr){
     const c=Util.el("div",{class:"card"});
     c.appendChild(Util.el("h2",{text:"A. Listen and Repeat（"+lr.items.length+" 句）"}));
     c.appendChild(Util.el("div",{class:"notice small",text:"情境："+lr.sceneDescription}));
-    c.appendChild(Util.el("p",{class:"muted small",text:lr.instruction||"聽每句後立刻複誦，每句只播一次，句子文字不顯示。"}));
-    const status=Util.el("div",{class:"small muted",text:"已完成 "+lr.items.filter(i=>i.transcript).length+" / "+lr.items.length+" 句"});
-    c.appendChild(status);
-    const ctl=Util.el("div",{class:"rec-row"});
-    const interim=Util.el("div",{class:"eng small muted"});
-    let idxNow=lr.items.findIndex(i=>!i.transcript);if(idxNow<0)idxNow=lr.items.length;
-    const playBtn=Util.el("button",{class:"primary",onclick:async()=>{
-      if(idxNow>=lr.items.length){alert("已完成全部句子");return;}
-      playBtn.disabled=true;typeBtn.disabled=true;
-      const it=lr.items[idxNow];
-      ctl.querySelector(".hint").textContent="播放中…";
-      await Speech.speak(it.target);
-      ctl.querySelector(".hint").innerHTML='<span class="dot"></span> 錄音中（複誦）…';
-      try{
-        const {blob,transcript}=await Speech.capture(10000,2000,txt=>interim.textContent=txt);
-        it.transcript=transcript||"(未辨識到語音)";
-        if(blob){it.audioId="au_"+Util.uid();await DB.put("audio",{audioId:it.audioId,blob});}
-        it.score=scoreLR(it.target,it.transcript);
-        idxNow++;await Session.save();
-      }catch(e){ctl.querySelector(".hint").textContent="麥克風無法使用："+e.message;playBtn.disabled=false;typeBtn.disabled=false;return;}
-      interim.textContent="";
-      status.textContent="已完成 "+lr.items.filter(i=>i.transcript).length+" / "+lr.items.length+" 句";
-      ctl.querySelector(".hint").textContent=idxNow<lr.items.length?"準備下一句":"全部完成！可展開檢視 diff";
-      playBtn.disabled=false;typeBtn.disabled=false;
-      if(idxNow>=lr.items.length)renderPractice();
-    }},["播放並複誦下一句"]);
-    const typeBtn=Util.el("button",{onclick:()=>{ // 打字 fallback
-      if(idxNow>=lr.items.length){alert("已完成");return;}
-      const t=prompt("（fallback）請輸入你聽到並複誦的句子：");if(t==null)return;
-      const it=lr.items[idxNow];it.transcript=t;it.score=scoreLR(it.target,t);idxNow++;Session.save();renderPractice();
-    }},["改用打字作答"]);
-    ctl.appendChild(playBtn);ctl.appendChild(typeBtn);ctl.appendChild(Util.el("span",{class:"hint small muted"}));
-    c.appendChild(ctl);c.appendChild(interim);
-    // 全部完成才顯示 diff
-    if(lr.items.every(i=>i.transcript)){
-      c.appendChild(revealBlock(()=>lr._revealed,v=>lr._revealed=v,()=>{
+    c.appendChild(Util.el("p",{class:"muted small",text:lr.instruction||"每句可先「重複聽」，再「開始錄音」複誦；也可改用打字。標準答案含中文翻譯。"}));
+    const done=lr.items.filter(i=>i.transcript).length;
+    c.appendChild(Util.el("div",{class:"small muted",text:"已完成 "+done+" / "+lr.items.length+" 句"}));
+    lr.items.forEach(it=>{
+      const box=Util.el("div",{style:"margin:14px 0;border-top:1px solid var(--border);padding-top:10px"});
+      box.appendChild(Util.el("div",{},[Util.el("strong",{text:"第 "+it.id+" 句"}),
+        it.score!=null?Util.el("span",{class:"chip",text:"評分 "+it.score+"/3"}):null]));
+      const tbox=Util.el("div",{class:"transcript-box"+(it.transcript?"":" empty"),
+        text:it.transcript||"（開始錄音後，複誦內容會即時顯示在這裡）"});
+      const ctl=Util.el("div",{class:"rec-row"});
+      const listenBtn=Util.el("button",{onclick:async()=>{const t=listenBtn.textContent;listenBtn.disabled=true;listenBtn.textContent="播放中…";await Speech.speak(it.target);listenBtn.textContent=t;listenBtn.disabled=false;}},["🔊 重複聽"]);
+      const recBtn=Util.el("button",{class:"primary",onclick:async()=>{
+        recBtn.disabled=true;
+        tbox.textContent="播放中…";tbox.classList.remove("empty");
+        await Speech.speak(it.target);
+        tbox.innerHTML='<span class="dot"></span> 錄音中（請複誦）…';
+        try{
+          const {blob,transcript}=await Speech.capture(10000,2000,txt=>{tbox.textContent=txt||"…";});
+          it.transcript=transcript||"(未辨識到語音)";
+          if(blob){it.audioId="au_"+Util.uid();await DB.put("audio",{audioId:it.audioId,blob});}
+          it.score=scoreLR(it.target,it.transcript);
+          await Session.save();renderPractice();
+        }catch(e){tbox.textContent="麥克風無法使用："+e.message;recBtn.disabled=false;}
+      }},["▶ 開始錄音"]);
+      const typeBtn=Util.el("button",{onclick:()=>{
+        const t=prompt("輸入你聽到並複誦的句子：",it.transcript||"");if(t==null)return;
+        it.transcript=t;it.score=scoreLR(it.target,t);Session.save();renderPractice();
+      }},["⌨ 改用打字"]);
+      ctl.appendChild(listenBtn);ctl.appendChild(recBtn);ctl.appendChild(typeBtn);
+      if(it.audioId)ctl.appendChild(Util.el("button",{onclick:async()=>{const rec=await DB.get("audio",it.audioId);if(rec){new Audio(URL.createObjectURL(rec.blob)).play();}else alert("找不到錄音檔");}},["🎧 錄音檔"]));
+      box.appendChild(ctl);box.appendChild(tbox);
+      box.appendChild(revealBlock(()=>it.revealed,v=>it.revealed=v,()=>{
         const d=Util.el("div",{});
-        lr.items.forEach(it=>{
-          d.appendChild(Util.el("div",{class:"small",style:"margin:8px 0"},[
-            Util.el("strong",{text:"第"+it.id+"句　"+ (it.score!=null?it.score+"/3":"")}),
-            Util.el("div",{class:"eng",html:"目標／你的複誦："}),
-            Util.el("div",{class:"eng",html:renderDiff(it.target,it.transcript)}),
-            Util.el("div",{class:"muted eng small",text:"逐字稿："+it.transcript})]));});
-        return d;}));
-    }else c.appendChild(Util.el("p",{class:"muted small",text:"完成全部句子後才會顯示逐字 diff 與分數。"}));
+        d.appendChild(Util.el("div",{class:"eng",html:"<strong>標準答案：</strong>"+Util.esc(it.target)}));
+        d.appendChild(Util.el("div",{text:LR_ZH[it.target]||"（此句無內建翻譯）"}));
+        if(it.transcript){
+          d.appendChild(Util.el("div",{class:"muted small",style:"margin-top:6px",text:"你的複誦逐字 diff（灰=漏字，紅底=多字）："}));
+          d.appendChild(Util.el("div",{class:"eng",html:renderDiff(it.target,it.transcript)}));
+        }
+        return d;
+      }));
+      c.appendChild(box);
+    });
     root.appendChild(c);
   }
   // B. Interview / Independent
@@ -2706,22 +2730,27 @@ function buildInterviewReveal(iv,s){
   const render=()=>{
     if(iv.scores.content!=null){
       const sc=iv.scores;
-      fb.innerHTML=`<strong>Content ${sc.content}/5　Organization ${sc.organization}/5　Language ${sc.language}/5　Fluency ${sc.fluency}/5</strong>`+
-        `<div class="muted">${Util.esc(iv.feedback||"")}</div>`+
-        (iv.timeComment?`<div class="muted">${Util.esc(iv.timeComment)}</div>`:``)+
-        `<div style="margin-top:8px"><strong>範例回答：</strong></div><div class="eng">${Util.esc(iv.sampleAnswer||"")}</div>`;
+      let h=`<strong>Content ${sc.content}/5　Organization ${sc.organization}/5　Language ${sc.language}/5　Fluency ${sc.fluency}/5</strong>`+
+        `<div class="muted" style="margin-top:6px">${Util.esc(iv.feedback||"")}</div>`+
+        (iv.timeComment?`<div class="muted">${Util.esc(iv.timeComment)}</div>`:``);
+      if(iv.improvements&&iv.improvements.length)
+        h+=`<div style="margin-top:8px"><strong>修改建議（針對你的答案）：</strong></div>`+
+           iv.improvements.map(x=>`<div class="small">• ${Util.esc(x)}</div>`).join("");
+      h+=`<div style="margin-top:8px"><strong>標準解答：</strong></div><div class="eng">${Util.esc(iv.sampleAnswer||"")}</div>`;
+      fb.innerHTML=h;
     }
   };
   if(iv.scores.content!=null)render();
   else{
     const b=Util.el("button",{onclick:async()=>{
-      if(!(await AI.has())){fb.innerHTML='<span class="warn">未設定 API 金鑰，無法自動評分與生成範例。</span>';return;}
+      if(!iv.transcript){alert("尚未作答");return;}
+      if(!(await AI.has())){fb.innerHTML='<span class="warn">未設定 API 金鑰，無法自動評分、生成標準解答與修改建議。請到「資料管理」設定金鑰。</span>';return;}
       b.disabled=true;b.textContent="評分中…";
       try{const g=await AI.gradeInterview(iv.prompt,iv.transcript,iv.actualSeconds);
-        iv.scores=g.scores;iv.feedback=g.feedback;iv.sampleAnswer=g.sampleAnswer;iv.timeComment=g.timeComment;
+        iv.scores=g.scores;iv.feedback=g.feedback;iv.improvements=g.improvements||[];iv.sampleAnswer=g.sampleAnswer;iv.timeComment=g.timeComment;
         await Session.save();b.remove();render();
-      }catch(e){fb.innerHTML='<span class="bad">評分失敗：'+Util.esc(e.message)+'</span>';b.disabled=false;b.textContent="AI 評分";}
-    }},["AI 評分 + 範例回答"]);
+      }catch(e){fb.innerHTML='<span class="bad">評分失敗：'+Util.esc(e.message)+'</span>';b.disabled=false;b.textContent="AI 評分 + 標準解答 + 修改建議";}
+    }},["AI 評分 + 標準解答 + 修改建議"]);
     d.appendChild(b);
   }
   // 重複用字檢查（口說用修正後逐字稿）
