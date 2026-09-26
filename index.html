@@ -1699,13 +1699,16 @@ const Bank={
     rows.forEach(r=>{byType[r.type]=(byType[r.type]||0)+1;if(r.topic)topics.add(r.topic);if(r.level)levels.add(r.level);});
     return {total:rows.length,byType,topics:[...topics],levels:[...levels]};
   },
-  // 依主題/難度過濾抽題；level 傳 null 表不限
+  // 依主題/難度過濾抽題；逐層放寬確保「只要該題型有題目就一定抽得到」，
+  // 讓每回合五大類都齊全（同主題同難度 → 同主題各難度 → 全題庫）。
   pick(rows,type,topics,level,n){
-    let pool=rows.filter(r=>r.type===type);
-    if(topics&&topics.length)pool=pool.filter(r=>!r.topic||topics.includes(r.topic));
-    let leveled=level?pool.filter(r=>r.level===level):pool;
-    if(leveled.length<n)leveled=pool; // 不夠就放寬難度
-    return Util.sample(leveled,Math.min(n,leveled.length));
+    const all=rows.filter(r=>r.type===type);
+    if(!all.length)return [];
+    const inTopic=r=>!topics||!topics.length||!r.topic||topics.includes(r.topic);
+    let pool=all.filter(r=>inTopic(r)&&(!level||r.level===level));
+    if(pool.length<n)pool=all.filter(inTopic);   // 放寬難度
+    if(pool.length<n)pool=all;                   // 放寬主題
+    return Util.sample(pool,Math.min(n,pool.length));
   },
 };
 
