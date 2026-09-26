@@ -2929,6 +2929,59 @@ async function renderData(){
   cb.appendChild(rep);
   wrap.appendChild(cb);
 
+  // AI 補齊缺漏主題
+  const cg=Util.el("div",{class:"card"});cg.appendChild(Util.el("h2",{text:"AI 補齊缺漏主題"}));
+  cg.appendChild(Util.el("p",{class:"muted small",html:"偵測哪些「題型 × 主題」在題庫裡沒有題目，用 AI 依種子格式生成並存入題庫（標記為生成題，可於備份時選擇是否包含）。<strong>需先設定 API 金鑰</strong>；生成題品質不一，建議事後檢視。"}));
+  const gapRep=Util.el("div",{class:"small",style:"margin:8px 0"});
+  const fillTypes=[
+    {type:"completeWords",label:"Complete the Words"},
+    {type:"dailyLifeReading",label:"Read in Daily Life"},
+    {type:"cloze",label:"克漏字"},
+    {type:"translation",label:"中翻英"},
+    {type:"writeEmail",label:"寫作 Email"},
+  ];
+  const findGaps=async()=>{
+    const rows=await Bank.all();const topics=(SEED_BANK.enums.topic)||[];
+    const gaps=[];
+    fillTypes.forEach(ft=>topics.forEach(tp=>{
+      if(!rows.some(r=>r.type===ft.type&&r.topic===tp))gaps.push({type:ft.type,label:ft.label,topic:tp});
+    }));
+    return gaps;
+  };
+  const fillBtn=Util.el("button",{class:"primary"},["開始 AI 補齊"]);
+  const detectBtn=Util.el("button",{onclick:async()=>{
+    const gaps=await findGaps();
+    if(!gaps.length){gapRep.innerHTML='<span class="ok">沒有缺漏，每個主題都有各題型的題目。</span>';fillBtn.disabled=true;return;}
+    const byType={};gaps.forEach(g=>{(byType[g.label]=byType[g.label]||[]).push(TOPIC_ZH[g.topic]||g.topic);});
+    gapRep.innerHTML="<strong>偵測到 "+gaps.length+" 個缺漏：</strong>"+
+      Object.entries(byType).map(([l,ts])=>`<div class="muted">• ${Util.esc(l)}：${ts.join("、")}</div>`).join("");
+    fillBtn.disabled=false;fillBtn._gaps=gaps;
+  }},["偵測缺漏"]);
+  fillBtn.disabled=true;
+  fillBtn.onclick=async()=>{
+    const gaps=fillBtn._gaps||await findGaps();
+    if(!gaps.length){gapRep.innerHTML='<span class="ok">沒有缺漏。</span>';return;}
+    if(!(await AI.has())){gapRep.innerHTML='<span class="warn">未設定 API 金鑰，無法生成。請先在上方設定金鑰。</span>';return;}
+    if(!confirm(`將呼叫 AI 生成 ${gaps.length} 題，可能需要一些時間與 API 用量。確定？`))return;
+    fillBtn.disabled=true;detectBtn.disabled=true;
+    let ok=0,fail=0;const rows=await Bank.all();
+    for(let i=0;i<gaps.length;i++){
+      const g=gaps[i];gapRep.innerHTML=`<span class="loading"><span class="spin"></span>生成中 ${i+1}/${gaps.length}：${g.label} · ${TOPIC_ZH[g.topic]||g.topic}</span>`;
+      try{
+        const examples=Bank.pick(rows,g.type,null,null,2).map(r=>{const o=Object.assign({},r);delete o._pk;delete o.type;delete o.subtype;delete o._generated;return o;});
+        const gen=await AI.generate(g.type,examples,[g.topic],"intermediate");
+        const id="gen_"+g.type+"_"+g.topic+"_"+Util.uid();
+        const row=Object.assign({},gen,{_pk:g.type+":"+id,id,type:g.type,topic:g.topic,level:gen.level||"intermediate",subtype:null,_generated:true});
+        await DB.put("questionBank",row);ok++;
+      }catch(e){fail++;console.warn("補題失敗",g,e);}
+    }
+    gapRep.innerHTML=`<span class="ok">完成：成功 ${ok} 題`+(fail?`，失敗 ${fail} 題（已略過）`:"")+`</span>`;
+    detectBtn.disabled=false;
+  };
+  cg.appendChild(Util.el("div",{class:"rec-row"},[detectBtn,fillBtn]));
+  cg.appendChild(gapRep);
+  wrap.appendChild(cg);
+
   // 備份
   const cbk=Util.el("div",{class:"card"});cbk.appendChild(Util.el("h2",{text:"備份"}));
   const incAudio=Util.el("input",{type:"checkbox"});
