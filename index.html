@@ -1773,7 +1773,9 @@ const Session={
     const inTopic=w=>!topics.length||!w.topic||topics.includes(w.topic);
     // 1) 複習字（最多 3）
     due.filter(d=>d.type==="vocab").slice(0,3).forEach(r=>addVocab(rows.find(x=>x._pk===r.itemId),true));
-    // 2) 同主題同難度 → 3) 同主題不限難度 → 4) 全題庫，逐層補滿到 10
+    // 2) 自訂單字／片語（優先納入，最多 5）
+    Util.shuffle(allVocab.filter(w=>w._custom)).slice(0,5).forEach(w=>addVocab(w,false));
+    // 3) 同主題同難度 → 4) 同主題不限難度 → 5) 全題庫，逐層補滿到 10
     Util.shuffle(allVocab.filter(w=>inTopic(w)&&w.level===level)).forEach(w=>addVocab(w,false));
     Util.shuffle(allVocab.filter(inTopic)).forEach(w=>addVocab(w,false));
     Util.shuffle(allVocab).forEach(w=>addVocab(w,false));
@@ -1825,7 +1827,7 @@ const Session={
     Session.cur=s;await DB.put("sessions",s);
     return s;
 
-    function mkVocab(w,fromReview){return {word:w.word,pos:w.pos,zh:w.zh,example:w.example,exampleZh:w.exampleZh||VOCAB_ZH[w.word]||"",note:w.note,fromReview};}
+    function mkVocab(w,fromReview){return {word:w.word,pos:w.pos,zh:w.zh,example:w.example,exampleZh:w.exampleZh||VOCAB_ZH[w.word]||"",note:w.note,fromReview,custom:!!w._custom,kind:w.kind||"word"};}
     function mkTrans(t,fromReview){return {srcId:t._pk,zh:t.zh,reference:t.reference,structure:t.structure,purpose:t.purpose,
       userAnswer:"",revealed:false,score:null,errorTypes:[],feedback:"",fromReview};}
     function byTopic(r,tps){return !r.topic||!tps||!tps.length||tps.includes(r.topic);}
@@ -2237,6 +2239,54 @@ function collectAudioIds(s,set){
 }
 
 /* ============================================================
+   VocabLib — 我的單字・片語庫（自訂，存進 questionBank）
+   ============================================================ */
+const VocabLib={
+  async list(){return (await Bank.all()).filter(r=>r.type==="vocab"&&r._custom)
+    .sort((a,b)=>(b.addedAt||"").localeCompare(a.addedAt||""));},
+  async add({word,zh,pos,example,exampleZh,kind}){
+    word=(word||"").trim();zh=(zh||"").trim();
+    if(!word||!zh)throw new Error("請至少填寫「單字／片語」與「中文意思」。");
+    const id="custom_"+Util.uid();
+    const row={_pk:"vocab:"+id,id,type:"vocab",_custom:true,kind:kind||"word",
+      word,zh,pos:(pos||"").trim(),example:(example||"").trim(),exampleZh:(exampleZh||"").trim(),
+      note:"",level:"intermediate",addedAt:Util.now()};
+    await DB.put("questionBank",row);return row;
+  },
+  async remove(pk){await DB.del("questionBank",pk);},
+};
+
+// 共用新增視窗；onDone 於成功新增後呼叫
+function openAddVocabModal(onDone){
+  const bg=Util.el("div",{class:"modal-bg"});const m=Util.el("div",{class:"modal"});
+  m.appendChild(Util.el("h2",{text:"加入我的單字・片語庫"}));
+  const kindSel=Util.el("select");[["word","單字"],["phrase","片語"]].forEach(([v,t])=>kindSel.appendChild(Util.el("option",{value:v,text:t})));
+  const fWord=Util.el("input",{type:"text",placeholder:"單字或片語（英文）"});
+  const fPos=Util.el("input",{type:"text",placeholder:"詞性（選填，如 n./v./adj.）"});
+  const fZh=Util.el("input",{type:"text",placeholder:"中文意思（必填）"});
+  const fEx=Util.el("input",{type:"text",placeholder:"例句（選填，英文）"});
+  const fExZh=Util.el("input",{type:"text",placeholder:"例句中文（選填）"});
+  const err=Util.el("p",{class:"bad small"});
+  m.appendChild(Util.el("label",{class:"blk small"},["類型"]));m.appendChild(kindSel);
+  [["單字／片語",fWord],["詞性",fPos],["中文意思",fZh],["例句",fEx],["例句中文",fExZh]].forEach(([lab,inp])=>{
+    m.appendChild(Util.el("label",{class:"blk small"},[lab]));m.appendChild(inp);});
+  m.appendChild(err);
+  const save=async(again)=>{
+    try{await VocabLib.add({word:fWord.value,zh:fZh.value,pos:fPos.value,example:fEx.value,exampleZh:fExZh.value,kind:kindSel.value});}
+    catch(e){err.textContent=e.message;return;}
+    onDone&&onDone();
+    if(again){fWord.value="";fPos.value="";fZh.value="";fEx.value="";fExZh.value="";err.textContent="";err.className="ok small";err.textContent="已加入！可繼續新增。";fWord.focus();}
+    else bg.remove();
+  };
+  m.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:()=>save(false)},["加入並關閉"]),
+    Util.el("button",{onclick:()=>save(true)},["加入並繼續"]),
+    Util.el("button",{class:"ghost",onclick:()=>bg.remove()},["取消"]),
+  ]));
+  bg.appendChild(m);document.body.appendChild(bg);fWord.focus();
+}
+
+/* ============================================================
    Render — 畫面
    ============================================================ */
 const App={route:"home",tab:0};
@@ -2430,15 +2480,22 @@ function renderPractice(){
 /* ---- 分頁1 單字 ---- */
 function tabVocab(root,s){
   const c=Util.el("div",{class:"card"});
-  c.appendChild(Util.el("h2",{text:"單字（只讀，不計分）"}));
+  c.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("h2",{text:"單字（只讀，不計分）",style:"margin:0;flex:1"}),
+    Util.el("button",{onclick:()=>openAddVocabModal(()=>{})},["＋ 加入我的單字・片語庫"]),
+  ]));
+  c.appendChild(Util.el("p",{class:"muted small",text:"在此加入的單字／片語會存入題庫，並在之後的練習優先出現（本回合已抽好的清單不變）。"}));
   s.vocab.forEach(v=>{
     const box=Util.el("div",{class:"list-row"});
     box.appendChild(Util.el("div",{class:"grow"},[
       Util.el("div",{},[Util.el("strong",{class:"eng",text:v.word})," ",Util.el("span",{class:"muted small",text:v.pos}),
-        " ",Util.el("span",{text:v.zh}),v.fromReview?Util.el("span",{class:"chip tag-review",text:"複習"}):null]),
-      Util.el("div",{class:"eng small",html:"<em>"+Util.esc(v.example)+"</em>"}),
+        " ",Util.el("span",{text:v.zh}),
+        v.kind==="phrase"?Util.el("span",{class:"chip",text:"片語"}):null,
+        v.custom?Util.el("span",{class:"chip tag-review",text:"自訂"}):null,
+        v.fromReview?Util.el("span",{class:"chip tag-review",text:"複習"}):null]),
+      v.example?Util.el("div",{class:"eng small",html:"<em>"+Util.esc(v.example)+"</em>"}):null,
       Util.el("div",{class:"small",text:v.exampleZh||VOCAB_ZH[v.word]||""}),
-      Util.el("div",{class:"muted small",text:v.note}),
+      v.note?Util.el("div",{class:"muted small",text:v.note}):null,
     ]));
     c.appendChild(box);
   });
@@ -2973,6 +3030,33 @@ async function renderData(){
   ]));
   cb.appendChild(rep);
   wrap.appendChild(cb);
+
+  // 我的單字・片語庫
+  const cv=Util.el("div",{class:"card"});cv.appendChild(Util.el("h2",{text:"我的單字・片語庫"}));
+  cv.appendChild(Util.el("p",{class:"muted small",text:"隨時加入自己的單字或片語；會存入題庫，並在之後的練習單字頁優先出現。"}));
+  const cvList=Util.el("div",{});
+  const refreshCv=async()=>{
+    const items=await VocabLib.list();
+    cvList.innerHTML="";
+    cvList.appendChild(Util.el("div",{class:"small muted",text:"目前共 "+items.length+" 筆"}));
+    items.forEach(it=>{
+      const row=Util.el("div",{class:"list-row"});
+      row.appendChild(Util.el("div",{class:"grow"},[
+        Util.el("div",{},[Util.el("strong",{class:"eng",text:it.word})," ",Util.el("span",{class:"muted small",text:it.pos||""}),
+          " ",Util.el("span",{text:it.zh}),it.kind==="phrase"?Util.el("span",{class:"chip",text:"片語"}):null]),
+        it.example?Util.el("div",{class:"eng small",html:"<em>"+Util.esc(it.example)+"</em>"}):null,
+        it.exampleZh?Util.el("div",{class:"small",text:it.exampleZh}):null,
+      ]));
+      row.appendChild(Util.el("button",{class:"ghost small",onclick:async()=>{if(confirm("刪除「"+it.word+"」？")){await VocabLib.remove(it._pk);refreshCv();}}},["刪除"]));
+      cvList.appendChild(row);
+    });
+  };
+  cv.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:()=>openAddVocabModal(refreshCv)},["＋ 新增單字／片語"]),
+  ]));
+  cv.appendChild(cvList);
+  wrap.appendChild(cv);
+  refreshCv();
 
   // AI 擴充題庫（補齊缺漏 + 為主題再加題）
   const cg=Util.el("div",{class:"card"});cg.appendChild(Util.el("h2",{text:"AI 擴充題庫"}));
