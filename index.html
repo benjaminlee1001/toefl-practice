@@ -2244,20 +2244,21 @@ function collectAudioIds(s,set){
 const VocabLib={
   async list(){return (await Bank.all()).filter(r=>r.type==="vocab"&&r._custom)
     .sort((a,b)=>(b.addedAt||"").localeCompare(a.addedAt||""));},
-  async add({word,zh,pos,example,exampleZh,kind}){
+  async add({word,zh,pos,example,exampleZh,note,kind,hard}){
     word=(word||"").trim();zh=(zh||"").trim();
     if(!word||!zh)throw new Error("請至少填寫「單字／片語」與「中文意思」。");
     const id="custom_"+Util.uid();
     const row={_pk:"vocab:"+id,id,type:"vocab",_custom:true,kind:kind||"word",
       word,zh,pos:(pos||"").trim(),example:(example||"").trim(),exampleZh:(exampleZh||"").trim(),
-      note:"",level:"intermediate",addedAt:Util.now()};
+      note:(note||"").trim(),hard:!!hard,quizCount:0,level:"intermediate",addedAt:Util.now()};
     await DB.put("questionBank",row);return row;
   },
+  async setHard(pk,hard){const r=await DB.get("questionBank",pk);if(r){r.hard=!!hard;await DB.put("questionBank",r);}},
   async remove(pk){await DB.del("questionBank",pk);},
 };
 
-// 共用新增視窗；onDone 於成功新增後呼叫
-function openAddVocabModal(onDone){
+// 共用新增視窗；onDone 於成功新增後呼叫；opts.kind 可預設類型
+function openAddVocabModal(onDone,opts){
   const bg=Util.el("div",{class:"modal-bg"});const m=Util.el("div",{class:"modal"});
   m.appendChild(Util.el("h2",{text:"加入我的單字・片語庫"}));
   const kindSel=Util.el("select");[["word","單字"],["phrase","片語"]].forEach(([v,t])=>kindSel.appendChild(Util.el("option",{value:v,text:t})));
@@ -2266,16 +2267,20 @@ function openAddVocabModal(onDone){
   const fZh=Util.el("input",{type:"text",placeholder:"中文意思（必填）"});
   const fEx=Util.el("input",{type:"text",placeholder:"例句（選填，英文）"});
   const fExZh=Util.el("input",{type:"text",placeholder:"例句中文（選填）"});
+  const fNote=Util.el("input",{type:"text",placeholder:"額外補充（選填，如同義字、用法、易混淆處）"});
+  const fHard=Util.el("input",{type:"checkbox"});
   const err=Util.el("p",{class:"bad small"});
   m.appendChild(Util.el("label",{class:"blk small"},["類型"]));m.appendChild(kindSel);
-  [["單字／片語",fWord],["詞性",fPos],["中文意思",fZh],["例句",fEx],["例句中文",fExZh]].forEach(([lab,inp])=>{
+  if(opts&&opts.kind){kindSel.value=opts.kind;}
+  [["單字／片語",fWord],["詞性",fPos],["中文意思",fZh],["例句",fEx],["例句中文",fExZh],["額外補充",fNote]].forEach(([lab,inp])=>{
     m.appendChild(Util.el("label",{class:"blk small"},[lab]));m.appendChild(inp);});
+  m.appendChild(Util.el("label",{class:"blk small"},[fHard," 標記為「難記／生字」（之後可在單字庫篩選）"]));
   m.appendChild(err);
   const save=async(again)=>{
-    try{await VocabLib.add({word:fWord.value,zh:fZh.value,pos:fPos.value,example:fEx.value,exampleZh:fExZh.value,kind:kindSel.value});}
+    try{await VocabLib.add({word:fWord.value,zh:fZh.value,pos:fPos.value,example:fEx.value,exampleZh:fExZh.value,note:fNote.value,kind:kindSel.value,hard:fHard.checked});}
     catch(e){err.textContent=e.message;return;}
     onDone&&onDone();
-    if(again){fWord.value="";fPos.value="";fZh.value="";fEx.value="";fExZh.value="";err.textContent="";err.className="ok small";err.textContent="已加入！可繼續新增。";fWord.focus();}
+    if(again){fWord.value="";fPos.value="";fZh.value="";fEx.value="";fExZh.value="";fNote.value="";fHard.checked=false;err.textContent="";err.className="ok small";err.textContent="已加入！可繼續新增。";fWord.focus();}
     else bg.remove();
   };
   m.appendChild(Util.el("div",{class:"rec-row"},[
@@ -2298,12 +2303,20 @@ function quizNorm(x){return String(x||"").toLowerCase().trim().replace(/\s+/g," 
 async function startQuiz(kind){
   const label=kind==="phrase"?"片語":"單字";
   const all=(await VocabLib.list()).filter(x=>(x.kind||"word")===kind);
-  if(!all.length){alert("你的"+label+"庫還沒有項目。請先到「資料管理 → 我的單字・片語庫」新增。");return;}
+  if(!all.length){alert("你的"+label+"庫還沒有項目。請先到首頁的「"+label+"庫」或「＋ 加入」新增。");return;}
   const def=Math.min(10,all.length);
   const raw=prompt(`要做幾題？（${label}庫目前共 ${all.length} 個）`,def);
   if(raw==null)return;
-  let n=parseInt(raw)||def;n=Math.max(1,Math.min(all.length,n));
-  const items=Util.sample(all,n).map(x=>({word:x.word,zh:x.zh,pos:x.pos,example:x.example,exampleZh:x.exampleZh,userAnswer:"",correct:null}));
+  let n=parseInt(raw);
+  if(!n||n<1){alert("請輸入有效的題數（正整數）。");return;}
+  // 需求1：題數超過庫存時通知
+  if(n>all.length){alert(`你的${label}庫目前只有 ${all.length} 個，不足 ${n} 題。將以全部 ${all.length} 個出題。`);n=all.length;}
+  // 需求2：優先挑選「較少被測到」的（未被選中的 quizCount=0 會排最前），同值隨機
+  const pool=Util.shuffle(all).sort((a,b)=>((a.quizCount||0)-(b.quizCount||0)));
+  const chosen=pool.slice(0,n);
+  // 累加測驗次數並存回，讓下次優先換別的
+  for(const row of chosen){row.quizCount=(row.quizCount||0)+1;await DB.put("questionBank",row);}
+  const items=chosen.map(x=>({_pk:x._pk,word:x.word,zh:x.zh,pos:x.pos,example:x.example,exampleZh:x.exampleZh,note:x.note,userAnswer:"",correct:null}));
   QUIZ={kind,label,items,graded:false};
   renderQuiz();
 }
@@ -2329,6 +2342,8 @@ function renderQuiz(){
       box.appendChild(Util.el("div",{class:ok?"ok small":"bad small",
         html:(ok?"✓ 正確":"✗ 正解：<strong class='eng'>"+Util.esc(it.word)+"</strong>")+
              (it.example?'　<span class="muted eng">'+Util.esc(it.example)+'</span>':"")}));
+      if(it.exampleZh)box.appendChild(Util.el("div",{class:"muted small",text:it.exampleZh}));
+      if(it.note)box.appendChild(Util.el("div",{class:"muted small",text:"補充："+it.note}));
     }
     c.appendChild(box);
   });
@@ -2342,6 +2357,49 @@ function renderQuiz(){
       Util.el("button",{class:"ghost",onclick:()=>{QUIZ=null;renderHome();}},["回首頁"]),
     ]));
   }
+  wrap.appendChild(c);mount(wrap);
+}
+
+/* ---- 單字庫 / 片語庫 檢視頁 ---- */
+let LIB_FILTER={word:false,phrase:false}; // 是否只看難記
+async function renderLibrary(kind){
+  const label=kind==="phrase"?"片語庫":"單字庫";
+  const onlyHard=LIB_FILTER[kind];
+  let items=(await VocabLib.list()).filter(x=>(x.kind||"word")===kind);
+  const hardCount=items.filter(x=>x.hard).length;
+  if(onlyHard)items=items.filter(x=>x.hard);
+  const wrap=Util.el("div",{class:"wrap"});
+  wrap.appendChild(Util.el("div",{class:"topbar"},[
+    Util.el("button",{class:"ghost",onclick:renderHome},["← 首頁"]),
+    Util.el("strong",{text:label}),
+  ]));
+  const c=Util.el("div",{class:"card"});
+  c.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("h2",{text:label+"（共 "+items.length+" 個）",style:"margin:0;flex:1"}),
+    Util.el("button",{class:"primary",onclick:()=>openAddVocabModal(()=>renderLibrary(kind),{kind})},["＋ 新增"]),
+  ]));
+  c.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:onlyHard?"":"primary",onclick:()=>{LIB_FILTER[kind]=false;renderLibrary(kind);}},["全部"]),
+    Util.el("button",{class:onlyHard?"primary":"",onclick:()=>{LIB_FILTER[kind]=true;renderLibrary(kind);}},["只看難記／生字（"+hardCount+"）"]),
+  ]));
+  if(!items.length)c.appendChild(Util.el("p",{class:"muted small",text:onlyHard?"目前沒有標記為難記的項目。":"這個庫還沒有項目，按「＋ 新增」開始收集。"}));
+  items.forEach(it=>{
+    const box=Util.el("div",{class:"list-row"});
+    box.appendChild(Util.el("div",{class:"grow"},[
+      Util.el("div",{},[Util.el("strong",{class:"eng",text:it.word})," ",Util.el("span",{class:"muted small",text:it.pos||""}),
+        " ",Util.el("span",{text:it.zh}),
+        it.kind==="phrase"?Util.el("span",{class:"chip",text:"片語"}):null,
+        it.hard?Util.el("span",{class:"chip tag-review",text:"難記"}):null]),
+      it.example?Util.el("div",{class:"eng small",html:"<em>"+Util.esc(it.example)+"</em>"}):null,
+      it.exampleZh?Util.el("div",{class:"small",text:it.exampleZh}):null,
+      it.note?Util.el("div",{class:"muted small",text:"補充："+it.note}):null,
+    ]));
+    const controls=Util.el("div",{});
+    controls.appendChild(Util.el("button",{class:"ghost small",onclick:async()=>{await VocabLib.setHard(it._pk,!it.hard);renderLibrary(kind);}},[it.hard?"★ 取消難記":"☆ 標難記"]));
+    controls.appendChild(Util.el("button",{class:"ghost small",onclick:async()=>{if(confirm("刪除「"+it.word+"」？")){await VocabLib.remove(it._pk);renderLibrary(kind);}}},["刪除"]));
+    box.appendChild(controls);
+    c.appendChild(box);
+  });
   wrap.appendChild(c);mount(wrap);
 }
 
@@ -2373,6 +2431,20 @@ async function renderHome(){
   c1.appendChild(Util.el("button",{class:"primary",onclick:openNewPracticeModal},["開始新練習"]));
   if(bank.total===0)c1.appendChild(Util.el("p",{class:"warn small",text:"題庫為空：新練習將自動改用 AI 生成模式（需設定金鑰）。可先到下方「資料管理」載入內建範例題庫。"}));
   wrap.appendChild(c1);
+
+  // 我的單字庫・片語庫（檢視）
+  const clib=await VocabLib.list();
+  const wordN=clib.filter(x=>(x.kind||"word")==="word").length;
+  const phraseN=clib.filter(x=>x.kind==="phrase").length;
+  const cl=Util.el("div",{class:"card"});
+  cl.appendChild(Util.el("h2",{text:"我的單字庫・片語庫"}));
+  cl.appendChild(Util.el("p",{class:"muted small",text:"檢視所有已儲存的單字與片語（含例句、中文翻譯、額外補充），可標記「難記／生字」並篩選。"}));
+  cl.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:()=>renderLibrary("word")},["單字庫（"+wordN+"）"]),
+    Util.el("button",{class:"primary",onclick:()=>renderLibrary("phrase")},["片語庫（"+phraseN+"）"]),
+    Util.el("button",{onclick:()=>openAddVocabModal(()=>renderHome())},["＋ 加入"]),
+  ]));
+  wrap.appendChild(cl);
 
   // 我的單字・片語測驗
   const cq=Util.el("div",{class:"card"});
