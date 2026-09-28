@@ -2075,11 +2075,19 @@ const AI={
       body:JSON.stringify({
         system_instruction:{parts:[{text:system}]},
         contents:[{role:"user",parts:[{text:user}]}],
-        generationConfig:{maxOutputTokens:maxTokens||1024,temperature:0.7}})});
+        generationConfig:{
+          // gemini-2.5-flash 是思考型模型，會先耗掉 output token 思考，導致 JSON 被截斷（Unexpected EOF）。
+          // 關閉思考、指定 JSON 回傳、拉高 token 上限。
+          thinkingConfig:{thinkingBudget:0},
+          responseMimeType:"application/json",
+          maxOutputTokens:Math.max(maxTokens||1024,2048),
+          temperature:0.7}})});
     if(!res.ok){const t=await res.text();throw new Error("api-"+res.status+":"+t.slice(0,200));}
     const data=await res.json();
     const cand=(data.candidates||[])[0];
-    return ((cand&&cand.content&&cand.content.parts)||[]).map(p=>p.text||"").join("");
+    const txt=((cand&&cand.content&&cand.content.parts)||[]).map(p=>p.text||"").join("");
+    if(!txt){const fr=cand&&cand.finishReason;throw new Error("empty"+(fr?"("+fr+")":"")+"：AI 未回傳內容，請再試一次");}
+    return txt;
   },
   parseJSON(txt){
     let t=txt.trim().replace(/^```(json)?/i,"").replace(/```$/,"").trim();
