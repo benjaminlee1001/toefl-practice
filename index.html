@@ -2292,6 +2292,59 @@ function openAddVocabModal(onDone){
 const App={route:"home",tab:0};
 function mount(node){const app=Util.$("#app");app.innerHTML="";app.appendChild(node);}
 
+/* ---- 我的單字・片語測驗 ---- */
+let QUIZ=null;
+function quizNorm(x){return String(x||"").toLowerCase().trim().replace(/\s+/g," ").replace(/[.!?,;:]+$/,"");}
+async function startQuiz(kind){
+  const label=kind==="phrase"?"片語":"單字";
+  const all=(await VocabLib.list()).filter(x=>(x.kind||"word")===kind);
+  if(!all.length){alert("你的"+label+"庫還沒有項目。請先到「資料管理 → 我的單字・片語庫」新增。");return;}
+  const def=Math.min(10,all.length);
+  const raw=prompt(`要做幾題？（${label}庫目前共 ${all.length} 個）`,def);
+  if(raw==null)return;
+  let n=parseInt(raw)||def;n=Math.max(1,Math.min(all.length,n));
+  const items=Util.sample(all,n).map(x=>({word:x.word,zh:x.zh,pos:x.pos,example:x.example,exampleZh:x.exampleZh,userAnswer:"",correct:null}));
+  QUIZ={kind,label,items,graded:false};
+  renderQuiz();
+}
+function renderQuiz(){
+  const q=QUIZ;if(!q){renderHome();return;}
+  const wrap=Util.el("div",{class:"wrap"});
+  wrap.appendChild(Util.el("div",{class:"topbar"},[
+    Util.el("button",{class:"ghost",onclick:()=>{QUIZ=null;renderHome();}},["← 首頁"]),
+    Util.el("strong",{text:q.label+"測驗（"+q.items.length+" 題）"})]));
+  const c=Util.el("div",{class:"card"});
+  c.appendChild(Util.el("p",{class:"muted small",text:"看中文意思，輸入對應的英文"+q.label+"。"}));
+  q.items.forEach((it,i)=>{
+    const box=Util.el("div",{style:"margin:12px 0;border-top:1px solid var(--border);padding-top:10px"});
+    box.appendChild(Util.el("div",{},[Util.el("strong",{text:(i+1)+". "}),it.zh,
+      it.pos?Util.el("span",{class:"muted small",text:" ("+it.pos+")"}):null]));
+    const inp=Util.el("input",{type:"text",placeholder:"輸入英文…"});inp.value=it.userAnswer||"";
+    inp.disabled=q.graded;
+    inp.addEventListener("input",()=>{it.userAnswer=inp.value;});
+    if(q.graded)inp.classList.add(quizNorm(it.userAnswer)===quizNorm(it.word)?"blank-ok":"blank-bad");
+    box.appendChild(inp);
+    if(q.graded){
+      const ok=quizNorm(it.userAnswer)===quizNorm(it.word);
+      box.appendChild(Util.el("div",{class:ok?"ok small":"bad small",
+        html:(ok?"✓ 正確":"✗ 正解：<strong class='eng'>"+Util.esc(it.word)+"</strong>")+
+             (it.example?'　<span class="muted eng">'+Util.esc(it.example)+'</span>':"")}));
+    }
+    c.appendChild(box);
+  });
+  if(!q.graded){
+    c.appendChild(Util.el("div",{class:"rec-row"},[Util.el("button",{class:"primary",onclick:()=>{QUIZ.graded=true;renderQuiz();}},["批改"])]));
+  }else{
+    const score=q.items.filter(it=>quizNorm(it.userAnswer)===quizNorm(it.word)).length;
+    c.appendChild(Util.el("div",{class:"band",text:"得分 "+score+" / "+q.items.length}));
+    c.appendChild(Util.el("div",{class:"rec-row"},[
+      Util.el("button",{class:"primary",onclick:()=>startQuiz(q.kind)},["再測一次"]),
+      Util.el("button",{class:"ghost",onclick:()=>{QUIZ=null;renderHome();}},["回首頁"]),
+    ]));
+  }
+  wrap.appendChild(c);mount(wrap);
+}
+
 async function renderHome(){
   App.route="home";
   const bank=await Bank.status();
@@ -2320,6 +2373,16 @@ async function renderHome(){
   c1.appendChild(Util.el("button",{class:"primary",onclick:openNewPracticeModal},["開始新練習"]));
   if(bank.total===0)c1.appendChild(Util.el("p",{class:"warn small",text:"題庫為空：新練習將自動改用 AI 生成模式（需設定金鑰）。可先到下方「資料管理」載入內建範例題庫。"}));
   wrap.appendChild(c1);
+
+  // 我的單字・片語測驗
+  const cq=Util.el("div",{class:"card"});
+  cq.appendChild(Util.el("h2",{text:"我的單字・片語測驗"}));
+  cq.appendChild(Util.el("p",{class:"muted small",text:"題目出自你的單字庫／片語庫：看中文意思、輸入英文。點下面按鈕後輸入題數即可開始。"}));
+  cq.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("button",{class:"primary",onclick:()=>startQuiz("word")},["單字測驗"]),
+    Util.el("button",{class:"primary",onclick:()=>startQuiz("phrase")},["片語測驗"]),
+  ]));
+  wrap.appendChild(cq);
 
   // 回合紀錄
   const c2=Util.el("div",{class:"card"});
