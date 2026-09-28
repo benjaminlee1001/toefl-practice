@@ -2974,10 +2974,9 @@ async function renderData(){
   cb.appendChild(rep);
   wrap.appendChild(cb);
 
-  // AI 補齊缺漏主題
-  const cg=Util.el("div",{class:"card"});cg.appendChild(Util.el("h2",{text:"AI 補齊缺漏主題"}));
-  cg.appendChild(Util.el("p",{class:"muted small",html:"偵測哪些「題型 × 主題」在題庫裡沒有題目，用 AI 依種子格式生成並存入題庫（標記為生成題，可於備份時選擇是否包含）。<strong>需先設定 API 金鑰</strong>；生成題品質不一，建議事後檢視。"}));
-  const gapRep=Util.el("div",{class:"small",style:"margin:8px 0"});
+  // AI 擴充題庫（補齊缺漏 + 為主題再加題）
+  const cg=Util.el("div",{class:"card"});cg.appendChild(Util.el("h2",{text:"AI 擴充題庫"}));
+  cg.appendChild(Util.el("p",{class:"muted small",html:"用 AI 依種子格式生成題目並<strong>永久存入題庫</strong>（標記為生成題，備份時可選擇是否包含）。<strong>需先設定 API 金鑰</strong>；生成題品質不一，建議事後檢視。"}));
   const fillTypes=[
     {type:"completeWords",label:"Complete the Words"},
     {type:"dailyLifeReading",label:"Read in Daily Life"},
@@ -2985,15 +2984,41 @@ async function renderData(){
     {type:"translation",label:"中翻英"},
     {type:"writeEmail",label:"寫作 Email"},
   ];
+  const topics=(SEED_BANK.enums.topic)||[];
+  const gapRep=Util.el("div",{class:"small",style:"margin:8px 0"});
+  // 共用：生成一題並存入
+  async function genOne(type,topic,rows){
+    const examples=Bank.pick(rows,type,null,null,2).map(r=>{const o=Object.assign({},r);delete o._pk;delete o.type;delete o.subtype;delete o._generated;return o;});
+    const gen=await AI.generate(type,examples,[topic],"intermediate");
+    const id="gen_"+type+"_"+topic+"_"+Util.uid();
+    const row=Object.assign({},gen,{_pk:type+":"+id,id,type,topic,level:gen.level||"intermediate",subtype:null,_generated:true});
+    await DB.put("questionBank",row);
+  }
+  // 共用：跑一批 [{type,label,topic}]
+  async function runBatch(jobs,btns){
+    if(!jobs.length){gapRep.innerHTML='<span class="muted">沒有要生成的項目。</span>';return;}
+    if(!(await AI.has())){gapRep.innerHTML='<span class="warn">未設定 API 金鑰，無法生成。請先在上方設定金鑰並儲存。</span>';return;}
+    if(!confirm(`將呼叫 AI 生成 ${jobs.length} 題，需要一些時間與 API 用量。確定？`))return;
+    btns.forEach(b=>b.disabled=true);
+    let ok=0,fail=0;const rows=await Bank.all();
+    for(let i=0;i<jobs.length;i++){
+      const g=jobs[i];gapRep.innerHTML=`<span class="loading"><span class="spin"></span>生成中 ${i+1}/${jobs.length}：${g.label} · ${TOPIC_ZH[g.topic]||g.topic}</span>`;
+      try{await genOne(g.type,g.topic,rows);ok++;}catch(e){fail++;console.warn("生成失敗",g,e);}
+    }
+    gapRep.innerHTML=`<span class="ok">完成：成功 ${ok} 題`+(fail?`，失敗 ${fail} 題（已略過，可能是額度上限或格式問題）`:"")+`</span>`;
+    btns.forEach(b=>b.disabled=false);
+  }
+
+  // --- 模式一：補齊缺漏 ---
+  cg.appendChild(Util.el("h3",{text:"模式一：補齊缺漏主題（每個空的組合各補 1 題）"}));
   const findGaps=async()=>{
-    const rows=await Bank.all();const topics=(SEED_BANK.enums.topic)||[];
-    const gaps=[];
+    const rows=await Bank.all();const gaps=[];
     fillTypes.forEach(ft=>topics.forEach(tp=>{
       if(!rows.some(r=>r.type===ft.type&&r.topic===tp))gaps.push({type:ft.type,label:ft.label,topic:tp});
     }));
     return gaps;
   };
-  const fillBtn=Util.el("button",{class:"primary"},["開始 AI 補齊"]);
+  const fillBtn=Util.el("button",{class:"primary"},["開始補齊"]);fillBtn.disabled=true;
   const detectBtn=Util.el("button",{onclick:async()=>{
     const gaps=await findGaps();
     if(!gaps.length){gapRep.innerHTML='<span class="ok">沒有缺漏，每個主題都有各題型的題目。</span>';fillBtn.disabled=true;return;}
@@ -3002,28 +3027,30 @@ async function renderData(){
       Object.entries(byType).map(([l,ts])=>`<div class="muted">• ${Util.esc(l)}：${ts.join("、")}</div>`).join("");
     fillBtn.disabled=false;fillBtn._gaps=gaps;
   }},["偵測缺漏"]);
-  fillBtn.disabled=true;
-  fillBtn.onclick=async()=>{
-    const gaps=fillBtn._gaps||await findGaps();
-    if(!gaps.length){gapRep.innerHTML='<span class="ok">沒有缺漏。</span>';return;}
-    if(!(await AI.has())){gapRep.innerHTML='<span class="warn">未設定 API 金鑰，無法生成。請先在上方設定金鑰。</span>';return;}
-    if(!confirm(`將呼叫 AI 生成 ${gaps.length} 題，可能需要一些時間與 API 用量。確定？`))return;
-    fillBtn.disabled=true;detectBtn.disabled=true;
-    let ok=0,fail=0;const rows=await Bank.all();
-    for(let i=0;i<gaps.length;i++){
-      const g=gaps[i];gapRep.innerHTML=`<span class="loading"><span class="spin"></span>生成中 ${i+1}/${gaps.length}：${g.label} · ${TOPIC_ZH[g.topic]||g.topic}</span>`;
-      try{
-        const examples=Bank.pick(rows,g.type,null,null,2).map(r=>{const o=Object.assign({},r);delete o._pk;delete o.type;delete o.subtype;delete o._generated;return o;});
-        const gen=await AI.generate(g.type,examples,[g.topic],"intermediate");
-        const id="gen_"+g.type+"_"+g.topic+"_"+Util.uid();
-        const row=Object.assign({},gen,{_pk:g.type+":"+id,id,type:g.type,topic:g.topic,level:gen.level||"intermediate",subtype:null,_generated:true});
-        await DB.put("questionBank",row);ok++;
-      }catch(e){fail++;console.warn("補題失敗",g,e);}
-    }
-    gapRep.innerHTML=`<span class="ok">完成：成功 ${ok} 題`+(fail?`，失敗 ${fail} 題（已略過）`:"")+`</span>`;
-    detectBtn.disabled=false;
-  };
+  fillBtn.onclick=async()=>{const gaps=fillBtn._gaps||await findGaps();await runBatch(gaps,[fillBtn,detectBtn]);fillBtn._gaps=null;};
   cg.appendChild(Util.el("div",{class:"rec-row"},[detectBtn,fillBtn]));
+
+  // --- 模式二：擴充（為主題再加題）---
+  cg.appendChild(Util.el("h3",{text:"模式二：為主題再加題（題庫持續變大）"}));
+  const typeSel=Util.el("select",{style:"width:auto;display:inline-block"});
+  typeSel.appendChild(Util.el("option",{value:"__all__",text:"全部題型"}));
+  fillTypes.forEach(ft=>typeSel.appendChild(Util.el("option",{value:ft.type,text:ft.label})));
+  const topicSel=Util.el("select",{style:"width:auto;display:inline-block"});
+  topicSel.appendChild(Util.el("option",{value:"__all__",text:"全部主題"}));
+  topics.forEach(tp=>topicSel.appendChild(Util.el("option",{value:tp,text:TOPIC_ZH[tp]||tp})));
+  const nInp=Util.el("input",{type:"number",value:"1",min:"1",max:"5",style:"width:64px;display:inline-block"});
+  const growBtn=Util.el("button",{class:"primary",onclick:async()=>{
+    const n=Math.max(1,Math.min(5,parseInt(nInp.value)||1));
+    const types=typeSel.value==="__all__"?fillTypes:fillTypes.filter(ft=>ft.type===typeSel.value);
+    const tps=topicSel.value==="__all__"?topics:[topicSel.value];
+    const jobs=[];types.forEach(ft=>tps.forEach(tp=>{for(let k=0;k<n;k++)jobs.push({type:ft.type,label:ft.label,topic:tp});}));
+    await runBatch(jobs,[growBtn,detectBtn,fillBtn]);
+  }},["開始生成"]);
+  cg.appendChild(Util.el("div",{class:"rec-row"},[
+    Util.el("span",{class:"small",text:"題型"}),typeSel,
+    Util.el("span",{class:"small",text:"主題"}),topicSel,
+    Util.el("span",{class:"small",text:"每主題"}),nInp,Util.el("span",{class:"small",text:"題"}),growBtn]));
+  cg.appendChild(Util.el("p",{class:"muted small",text:"提示：選「全部題型 × 全部主題 × N」會一次生成很多題（可能觸發免費額度上限），建議分批。"}));
   cg.appendChild(gapRep);
   wrap.appendChild(cg);
 
