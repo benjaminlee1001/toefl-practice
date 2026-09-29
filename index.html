@@ -2217,7 +2217,7 @@ const Backup={
     const meta=await DB.getAll("meta").then(m=>m.filter(x=>x.key!=="apiKey")); // 不匯出金鑰
     const questionBank=await DB.getAll("questionBank");
     let audio=[];
-    if(includeAudio){const a=await DB.getAll("audio");for(const r of a)audio.push({audioId:r.audioId,data:await Backup.blobToB64(r.blob)});}
+    if(includeAudio){const a=await DB.getAll("audio");for(const r of a){const b=await loadAudioBlob(r.audioId);if(b)audio.push({audioId:r.audioId,data:await Backup.blobToB64(b)});}}
     Backup.download({version:1,exportedAt:Util.now(),sessions,meta,questionBank,audio},"toefl_backup_"+Util.stamp()+".json");
   },
   async exportBank(includeGenerated){
@@ -2232,7 +2232,7 @@ const Backup={
     for(const s of (obj.sessions||[]))await DB.put("sessions",s);
     for(const q of (obj.questionBank||[]))await DB.put("questionBank",q);
     for(const m of (obj.meta||[]))if(m.key!=="apiKey")await DB.put("meta",m);
-    for(const a of (obj.audio||[]))await DB.put("audio",{audioId:a.audioId,blob:Backup.b64ToBlob(a.data)});
+    for(const a of (obj.audio||[])){const b=Backup.b64ToBlob(a.data);await DB.put("audio",{audioId:a.audioId,buffer:await b.arrayBuffer(),mime:b.type||"audio/webm"});}
   },
   async pruneAudio(){
     const sessions=await Session.list();
@@ -2244,6 +2244,19 @@ const Backup={
 function collectAudioIds(s,set){
   if(s.speaking&&s.speaking.listenRepeat)s.speaking.listenRepeat.items.forEach(i=>i.audioId&&set.add(i.audioId));
   (s.speaking&&s.speaking.interview||[]).forEach(i=>i.audioId&&set.add(i.audioId));
+}
+// 錄音以 ArrayBuffer 儲存（比直接存 Blob 在手機/各瀏覽器更穩，避免 "Error preparing Blob..."）
+async function saveAudio(blob){
+  const id="au_"+Util.uid();
+  const buffer=await blob.arrayBuffer();
+  await DB.put("audio",{audioId:id,buffer,mime:blob.type||"audio/webm"});
+  return id;
+}
+async function loadAudioBlob(id){
+  const rec=await DB.get("audio",id);if(!rec)return null;
+  if(rec.buffer)return new Blob([rec.buffer],{type:rec.mime||"audio/webm"});
+  if(rec.blob)return rec.blob; // 舊資料相容
+  return null;
 }
 
 /* ============================================================
@@ -2870,25 +2883,28 @@ function tabSpeaking(root,s){
         text:it.transcript||"（開始錄音後，複誦內容會即時顯示在這裡）"});
       const ctl=Util.el("div",{class:"rec-row"});
       const listenBtn=Util.el("button",{onclick:async()=>{const t=listenBtn.textContent;listenBtn.disabled=true;listenBtn.textContent="播放中…";await Speech.speak(it.target);listenBtn.textContent=t;listenBtn.disabled=false;}},["🔊 重複聽"]);
+      const stopBtn=Util.el("button",{onclick:()=>Speech.stop()},["⏹ 結束錄音"]);stopBtn.disabled=true;
       const recBtn=Util.el("button",{class:"primary",onclick:async()=>{
         recBtn.disabled=true;
         tbox.textContent="播放中…";tbox.classList.remove("empty");
         await Speech.speak(it.target);
-        tbox.innerHTML='<span class="dot"></span> 錄音中（請複誦）…';
+        tbox.innerHTML='<span class="dot"></span> 錄音中（請複誦，講完可按「結束錄音」）…';
+        stopBtn.disabled=false;
         try{
-          const {blob,transcript}=await Speech.capture(10000,2000,txt=>{tbox.textContent=txt||"…";});
+          const {blob,transcript}=await Speech.capture(15000,2500,txt=>{tbox.textContent=txt||"…";});
           it.transcript=transcript||"(未辨識到語音)";
-          if(blob){it.audioId="au_"+Util.uid();await DB.put("audio",{audioId:it.audioId,blob});}
           it.score=scoreLR(it.target,it.transcript);
+          // 錄音存檔失敗不影響作答
+          if(blob){try{it.audioId=await saveAudio(blob);}catch(err){console.warn("錄音存檔失敗",err);it.audioId="";}}
           await Session.save();renderPractice();
-        }catch(e){tbox.textContent="麥克風無法使用："+e.message;recBtn.disabled=false;}
+        }catch(e){tbox.textContent="麥克風無法使用："+e.message;recBtn.disabled=false;stopBtn.disabled=true;}
       }},["▶ 開始錄音"]);
       const typeBtn=Util.el("button",{onclick:()=>{
         const t=prompt("輸入你聽到並複誦的句子：",it.transcript||"");if(t==null)return;
         it.transcript=t;it.score=scoreLR(it.target,t);Session.save();renderPractice();
       }},["⌨ 改用打字"]);
-      ctl.appendChild(listenBtn);ctl.appendChild(recBtn);ctl.appendChild(typeBtn);
-      if(it.audioId)ctl.appendChild(Util.el("button",{onclick:async()=>{const rec=await DB.get("audio",it.audioId);if(rec){new Audio(URL.createObjectURL(rec.blob)).play();}else alert("找不到錄音檔");}},["🎧 錄音檔"]));
+      ctl.appendChild(listenBtn);ctl.appendChild(recBtn);ctl.appendChild(stopBtn);ctl.appendChild(typeBtn);
+      if(it.audioId)ctl.appendChild(Util.el("button",{onclick:async()=>{const b=await loadAudioBlob(it.audioId);if(b){new Audio(URL.createObjectURL(b)).play();}else alert("找不到錄音檔");}},["🎧 錄音檔"]));
       box.appendChild(ctl);box.appendChild(tbox);
       box.appendChild(revealBlock(()=>it.revealed,v=>it.revealed=v,()=>{
         const d=Util.el("div",{});
@@ -2923,7 +2939,7 @@ function tabSpeaking(root,s){
         const {blob,transcript}=await Speech.capture(iv.speakSeconds*1000,null,txt=>{interim.textContent=txt||"…";});
         iv.actualSeconds=Math.round((Date.now()-t0)/1000);
         iv.transcript=transcript;
-        if(blob){iv.audioId="au_"+Util.uid();await DB.put("audio",{audioId:iv.audioId,blob});}
+        if(blob){try{iv.audioId=await saveAudio(blob);}catch(err){console.warn("錄音存檔失敗",err);iv.audioId="";}}
         await Session.save();renderPractice();
       }catch(e){timer.textContent="麥克風無法使用："+e.message;startBtn.disabled=false;}
     }},["開始錄音"]);
@@ -2934,7 +2950,7 @@ function tabSpeaking(root,s){
 
     if(iv.transcript){
       if(iv.audioId){c.appendChild(Util.el("div",{class:"rec-row"},[Util.el("button",{onclick:async()=>{
-        const rec=await DB.get("audio",iv.audioId);if(rec){const a=new Audio(URL.createObjectURL(rec.blob));a.play();}}},["▶ 播放錄音"])]));}
+        const b=await loadAudioBlob(iv.audioId);if(b){new Audio(URL.createObjectURL(b)).play();}else alert("找不到錄音檔");}},["▶ 播放錄音"])]));}
       c.appendChild(Util.el("div",{class:"small muted",text:`作答 ${iv.actualSeconds||0} 秒，約 ${Util.normWords(iv.transcript).length} 字`}));
       c.appendChild(Util.el("label",{class:"blk small"},["逐字稿（可手動修正）："]));
       const ta=Util.el("textarea",{rows:3});ta.value=iv.transcript;
